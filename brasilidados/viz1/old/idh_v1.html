@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IDH no Brasil | brasilidados</title>
+    <script type="text/javascript" src="d3_v3.js"></script>
+    <style type="text/css">
+		
+		.vizAll {
+			width: 960px;
+			height: 780px;
+			margin: 10px;
+			background-color: #eee;
+		}
+		
+		.vizMapa {
+			display: inline-block;
+			float: left;
+			width: 460px;
+			height: 600px;
+			margin: 10px;
+			background-color: #ddd;
+		}
+		
+		.vizScatter {
+			display: inline-block;
+			float: right;
+			width: 460px;
+			height: 460px;
+			margin: 10px;
+			background-color: #ddd;
+		}
+		
+		.vizControles {
+			display: inline-block;
+			float: left;
+			width: 460px;
+			height: 140px;
+			margin: 10px;
+			background-color: #ddd;
+			clear: left;
+		}
+		
+		.vizBarras {
+			display: inline-block;
+			float: right;
+			width: 460px;
+			height: 280px;
+			margin: 10px;
+			background-color: #ddd;
+		}
+		
+		.axis path{
+			fill: none;
+			stroke: none;
+			shape-rendering: crispEdges;
+		}
+		
+		.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+		}
+		
+    </style>
+</head>
+<body>
+	<div class="vizAll">
+    	<div class="vizMapa"></div>
+    	<div class="vizScatter"></div>
+    	<div class="vizBarras"></div>
+    	<div class="vizControles"></div>
+    </div>
+    <script type="text/javascript">
+	
+	var estadoSelecionado = "BR";
+	
+	plotMapa();
+	plotScatter();
+	plotBarras();
+	
+	function plotScatter() {
+		
+		//definir largura e altura
+		var w = parseFloat(d3.select(".vizScatter").style("width").slice(0,-2));
+		var h = parseFloat(d3.select(".vizScatter").style("height").slice(0,-2));
+		var padding = {top: 50, right: 50, bottom: 50, left: 50};
+		
+		var svgScatter = d3.select(".vizScatter")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h);
+		
+		//carregar dados sobre IDH no estados brasileiros
+		d3.csv("IDH10_BRA_estados.csv", function(error, dataset) {
+			
+			var rMax = d3.max(dataset, function(d) { return d.IDHM_R; }),
+				rMin = d3.min(dataset, function(d) { return d.IDHM_R; }),
+				eMax = d3.max(dataset, function(d) { return d.IDHM_E; }),
+				eMin = d3.min(dataset, function(d) { return d.IDHM_E; }),
+				lMax = d3.max(dataset, function(d) { return d.IDHM_L; }),
+				lMin = d3.min(dataset, function(d) { return d.IDHM_L; }),
+				idhMin = d3.min(dataset, function(d) { return d.IDHM; }),
+				idhMax = d3.max(dataset, function(d) { return d.IDHM; });
+			
+			
+			//Create scale functions
+			var xScale = d3.scale.linear()
+				//.domain([eMin, eMax])
+				.domain([.15, .8])
+				.range([padding.left, w - padding.right]);
+			var yScale = d3.scale.linear()
+				//.domain([lMin, lMax])
+				.domain([.55, .9])
+				.range([h - padding.bottom, padding.top]);
+			var rScale = d3.scale.pow().exponent(4)
+				//.domain([rMin, rMax])
+				.domain([.45, .9])
+				.range([5, 20]);
+			//console.log(Math.pow(rMax/rMin,4));
+			var colorScale = d3.scale.linear()
+				.domain([idhMin, idhMax])
+				.range([100, 255]);
+				
+			//definir scales para collide()
+			var radius = rScale,
+				x = xScale;
+			
+			for(var i = 0; i < dataset.length; i++) {
+				dataset[i].cx = xScale(dataset[i].IDHM_E);
+				dataset[i].cy = yScale(dataset[i].IDHM_L);
+				dataset[i].radius = rScale(dataset[i].IDHM_R);
+			}
+
+			var force = d3.layout.force()
+				.nodes(dataset)
+				.size([w, h])
+				.gravity(0)
+				.charge(0)
+				.on("tick", tick)
+				.start();
+			
+			//Create SVG element
+			var circleScatter = svgScatter.selectAll("circle")
+				.data(dataset)
+				.enter()
+				.append("circle")
+				.attr("r", function(d) { return d.radius; })
+				.attr("stroke", "#aaa")
+				.attr("fill", function(d) { return "rgb(50, 50, " + parseInt(colorScale(d.IDHM)) + ")"; })
+				.call(force.drag)
+				.on("click", function(d) { 
+					estadoSelecionado = d.UFSIGLA;
+					d3.selectAll("svg").remove();
+					plotMapa();
+					plotBarras();
+					plotScatter();
+				});
+			
+			//realçar o estado selecionado
+			if(estadoSelecionado == "BR") {}
+			else {
+				for(var i = 0; i < dataset.length; i++) {
+					if(circleScatter[0][i].__data__.UFSIGLA == estadoSelecionado) {
+						circleScatter[0][i].style.fill = "orange";
+					}
+				}
+			}
+			
+			var textScatter = svgScatter.selectAll("text")
+				.data(dataset)
+				.enter()
+				.append("text")
+				.text(function(d) { return d.UFSIGLA; })
+				.attr("font-family", "sans-serif")
+				.attr("font-size", "9px")
+				.attr("fill", "white")
+				.attr("text-anchor", "middle")
+				.style("pointer-events", "none")
+				.call(force.drag);
+				
+			function tick(e) {
+				svgScatter.selectAll("circle")
+					.each(gravity(.05))
+					.each(collide(.5))
+					.attr("cx", function(d) { return d.x; })
+					.attr("cy", function(d) { return d.y; })
+				textScatter
+					.each(gravity(.05))
+					.each(collide(.5))
+					.attr("x", function(d) { return d.x; })
+					.attr("y", function(d) { return d.y + 3; });
+			}
+			
+			//função para evitar colisões entre círculos
+			function collide(alpha) {
+				var quadtree = d3.geom.quadtree(dataset);
+				return function(d) {
+					var r = d.radius + radius.domain()[1] + padding,
+						nx1 = d.x - r,
+						nx2 = d.x + r,
+						ny1 = d.y - r,
+						ny2 = d.y + r;
+					quadtree.visit(function(quad, x1, y1, x2, y2) {
+						if (quad.point && (quad.point !== d)) {
+							var x = d.x - quad.point.x,
+								y = d.y - quad.point.y,
+								l = Math.sqrt(x * x + y * y),
+								r = d.radius + quad.point.radius;
+							if (l < r) {
+								l = (l - r) / l * alpha;
+								d.x -= x *= l;
+								d.y -= y *= l;
+								quad.point.x += x;
+								quad.point.y += y;
+							}
+						}
+						return x1 > nx2
+							|| x2 < nx1
+							|| y1 > ny2
+							|| y2 < ny1;
+					});
+				};
+			}
+				
+			// criar função para atrair círculos as suas posições
+			function gravity(alpha) {
+				return function(d) {
+					d.y += (d.cy - d.y) * alpha;
+					d.x += (d.cx - d.x) * alpha;
+				};
+			}
+			
+			//Define X axis
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+
+			//Define Y axis
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			//Create X axis
+			svgScatter.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + (h - padding.bottom) + ")")
+				.call(xAxis);
+			
+			//Create Y axis
+			svgScatter.append("g")
+				.attr("class", "y axis")
+				.attr("transform", "translate(" + padding.left + ",0)")
+				.call(yAxis);		
+		});
+	}
+	
+	function plotBarras() {
+		
+		//definir largura e altura
+		var w = parseFloat(d3.select(".vizBarras").style("width").slice(0,-2));
+		var h = parseFloat(d3.select(".vizBarras").style("height").slice(0,-2));
+		var padding = {top: 50, right: 10, bottom: 10, left: 10};
+			
+		//define myNewSvg
+		var svgBarras = d3.select(".vizBarras")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h);
+		
+		//carregar dados sobre IDH no estados brasileiros
+		d3.csv("IDH10_BRA_estados.csv", function(error, dataset) {
+			
+			//define ordinal scales to position bars
+			var xScale = d3.scale.ordinal()
+				.domain(d3.range(dataset.length))
+				.rangeRoundBands([padding.left, w - padding.right], 0.05); //5% de espaço entre barras
+				
+			var yScale = d3.scale.linear()
+				.domain([0, d3.max(dataset, function(d) { return d.IDHM; })])
+				.range([0, h - padding.top]);
+				
+			var colorScale = d3.scale.linear()
+				.domain([d3.min(dataset, function(d) { return d.IDHM; }), d3.max(dataset, function(d) { return d.IDHM; })])
+				.range([100, 255]);
+			
+			//define rectangles within mySvg and bind to dataset
+			var rectBarras = svgBarras.selectAll("rect")
+				.data(dataset)
+				.enter()
+				.append("rect")
+				.sort(function(a, b) { 
+					return d3.ascending(a.IDHM, b.IDHM);
+				})
+				.attr("x", function(d, i) { return xScale(i); })
+				.attr("y", function(d) { return h - yScale(d.IDHM) - padding.bottom; })
+				.attr("width", xScale.rangeBand())
+				.attr("height", function(d) { return yScale(d.IDHM); })
+				.style("fill", function(d) { return "rgb(50, 50, " + parseInt(colorScale(d.IDHM)) + ")"; })
+				.on("click", function(d) { 
+					estadoSelecionado = d.UFSIGLA;
+					d3.selectAll("svg").remove();
+					plotMapa();
+					plotBarras();
+					plotScatter();
+				});
+			
+			//realçar o estado selecionado
+			if(estadoSelecionado == "BR") {}
+			else {
+				for(var i = 0; i < dataset.length; i++) {
+					if(rectBarras[0][i].__data__.UFSIGLA == estadoSelecionado) {
+						rectBarras[0][i].style.fill = "orange";
+					}
+				}
+			}
+			
+			//define labels within mySvg and bind to dataset
+			svgBarras.selectAll("text")
+				.data(dataset)
+				.enter()
+				.append("text")
+				.sort(function(a, b) { 
+					return d3.ascending(a.IDHM, b.IDHM);
+				})
+				.text(function(d) { return d.UFSIGLA; })
+				.attr("x", function(d, i) { return xScale(i) + xScale.rangeBand()/2; })
+				.attr("y", function(d) { return h - yScale(d.IDHM) + 14; })
+				.attr("font-family", "sans-serif")
+				.attr("font-size", "9px")
+				.attr("fill", "white")
+				.attr("text-anchor", "middle")
+				.style("pointer-events", "none");
+			
+		});
+	}
+	
+	
+	
+	function plotMapa() {
+		
+		//definir largura e altura
+		var w = parseFloat(d3.select(".vizMapa").style("width").slice(0,-2));
+		var h = parseFloat(d3.select(".vizMapa").style("height").slice(0,-2));
+		var centroBR = [-54.3, -15.2];
+		
+		//definir projeção do mapa
+		var projection = d3.geo.mercator()
+			.center(centroBR)
+			.translate([w/2, h/2])
+			.scale([1.4 * w]);
+		
+		//definir gerador de path
+		var path = d3.geo.path()
+			.projection(projection);
+		
+		//criar elemento svg
+		var svgMapa = d3.select(".vizMapa")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h);
+			
+		//carregar dados do GeoJSON
+		d3.json("BRA_estados.json", function(json) {
+			
+			//adicionar cores aos estados
+			for(var i = 0; i < json.features.length; i++) {
+					json.features[i].properties.color = "blue";
+			}
+			
+			//criar path e colorir conforme color(value)
+			var pathMapa = svgMapa.selectAll("path")
+				.data(json.features)
+				.enter()
+				.append("path")
+				.attr("d", path)
+				.style("fill", function(d) { return d.properties.color; })
+				.style("stroke", "#aaa")
+				.on("click", function(d) { 
+				
+					estadoSelecionado = d.properties.name;
+					d3.selectAll("svg").remove();
+					plotMapa();
+					plotBarras();
+					plotScatter();
+				});
+			
+			//realçar o estado selecionado
+			if(estadoSelecionado == "BR") {}
+			else {
+				for(var i = 0; i < json.features.length; i++) {
+					if(pathMapa[0][i].__data__.properties.name == estadoSelecionado) {
+						pathMapa[0][i].style.fill = "orange";
+					}
+				}
+			}				
+			
+			//criar rótulos com nomes das UFs
+			var rotulosUf = svgMapa.selectAll("text")
+				.data(json.features)
+				.enter()
+				.append("text")
+				.text(function(d) { return d.properties.name; })
+				.attr({
+					x: function(d) { return path.centroid(d)[0]; },
+					y: function(d) { return path.centroid(d)[1]; }
+				})
+				.attr("font-family", "helvetica")
+				.attr("font-size", "10px")
+				.attr("fill", "white")
+				.attr("text-anchor", "middle")
+				.style("pointer-events", "none");
+					
+		});
+	}	
+				
+			
+	</script>
+</body>
+</html>

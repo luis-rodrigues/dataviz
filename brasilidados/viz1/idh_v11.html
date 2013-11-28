@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>IDH no Brasil | brasilidados</title>
+    <script type="text/javascript" src="d3.v3.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="dropdown/docsupport/style.css">
+    <link rel="stylesheet" href="dropdown/docsupport/prism.css">
+    <link rel="stylesheet" href="dropdown/chosen.css">
+    <script src="jquery-1.10.2.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="dropdown/chosen.jquery.js" type="text/javascript" charset="utf-8"></script>
+	<script src="dropdown/docsupport/prism.js" type="text/javascript" charset="utf-8"></script>
+    
+    <style type="text/css">
+		@font-face {
+			font-family: "Museo300Regular";
+			src: url(Museo300-Regular-webfont.ttf) format("truetype");
+		}
+		
+		@font-face {
+			font-family: "OpenSansLight";
+			src: url(OpenSans-Light.ttf) format("truetype");
+		}
+		
+		body {
+			margin: 0;
+			text-align: center;
+		}
+		
+		h2 {
+			font-family: "Museo300Regular";
+			font-size: 16px;
+			text-align: left;
+			margin: 0;
+			color: #D95929;
+			
+		}
+		
+		p {
+			font-family: "OpenSansLight";
+			font-size: 12px;
+			text-align: left;
+			padding-top: 10px;
+			
+		}
+		
+		#viz {
+			display: block;
+			width: 960px;
+			height: 600px;
+			margin: auto;
+			/*background-color: rgba(0,0,0,.1);*/
+		}
+		
+		#viz-nav {
+			display: inline-block;
+			position: relative;
+			float: left;
+			width: 180px;
+			height: 600px;
+			background-color: rgba(0,0,0,.09);
+		}
+		
+		#viz-ranking {
+			display: inline-block;
+			float: left;
+			width: 180px;
+			height: 600px;
+			background-color: rgba(0,0,0,.06);
+		}
+		
+		#viz-main {
+			display: inline-block;
+			float: left;
+			width: 600px;
+			height: 600px;
+			background-color: rgba(0,0,0,.03);
+		}
+		
+		#viz-intro {
+			display: block;
+			width: 160px;
+			height: 280px;
+			padding: 10px;
+			line-height: 20px;
+			overflow: auto;
+			/*background-color: rgba(0,0,0,.1);*/
+		}
+		
+		.viz-descricao {
+			display: none;
+			position: absolute;
+			top: 0;
+			width: 160px;
+			height: 580px;
+			padding: 10px;
+			line-height: 20px;
+			overflow: auto;
+			background-color: white;
+		}
+		
+		.active {
+			display: block;
+		}
+		
+		#viz-ano {
+			display: block;
+			width: 180px;
+			height: 60px;
+			/*background-color: rgba(0,0,0,.2);*/
+		}
+		
+		.viz-ano-label {
+			font-family: "Museo300Regular";
+			font-size: 40px;
+			pointer-events: none;
+			text-anchor: middle;
+			
+		}
+		
+		#viz-mapa {
+			display: block;
+			width: 180px;
+			height: 240px;
+			/*background-color: rgba(0,0,0,.1);*/
+		}
+		
+		#path-mapa {
+			cursor: pointer;
+		}
+		
+		#mapa-uf {
+			font-family: helvetica;
+			font-size: 6px;
+			fill: white;
+			text-anchor: middle;
+			pointer-events: none;
+		}
+		
+		.viz-mapa-label {
+			display: none;
+			position: absolute;
+			bottom: 0;
+			height: 25px;
+			padding-top: 5px;
+			width: 100%;
+			background-color: rgba(0,0,0,.3);
+			color: white;
+			font-family: "Museo300Regular";
+			font-size: 14px;
+			
+		}
+		
+		#viz-barras {
+			display: block;
+			width: 180px;
+			height: 540px;
+			/*background-color: rgba(0,0,0,.05);*/
+		}
+		
+		#viz-scatter {
+			position: absolute;
+			float: left;
+			width: 600px;
+			height: 600px;
+			/*background-color: rgba(0,0,0,.1);*/
+		}
+		
+		.viz-select {
+			width: auto;
+			height: 50px;
+			margin: 10px 10px 0 10px;
+			text-align: left;
+			
+		}
+		
+		#select-barras {
+			display: inline-block;
+			margin: 10px auto 0 auto;
+		}
+		
+		#select-scatter {
+			position: absolute;
+			width: 100%;
+			text-align: center;
+		}
+		
+		#select-scatter-unit {
+			display: inline-block;
+			margin: 10px auto 0 auto;
+		}
+		
+		.axis path{
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		
+		.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		
+		.axis text {
+			font-family: "Museo300Regular";
+			font-size: 11px;
+		}
+		
+		.overlay {
+		  fill: none;
+		  pointer-events: all;
+		  cursor: ew-resize;
+		}
+		
+		.idh-realce {
+			fill: orange;
+		}
+		
+		.legenda {
+			font-family: "Museo300Regular";
+			font-size: 14px;
+			line-height: 20px;
+			margin: 0;
+			padding: 0;
+			color: #D95929;
+		}
+	</style>
+</head>
+<body>
+	<div id="viz">
+    	<div id="viz-nav">
+            <div id="viz-intro">
+            	<h2>O que é isso?</h2>
+                <p>Índice de Desenvolvimento Humano (IDH) é uma medida comparativa usada para avaliar o grau de "desenvolvimento humano" local. É calculado a partir de dados sobre Longevidade, Educação e Renda. Visualize aqui os 177 principais índices relativos ao IDH de cada estado brasileiro, em 1991, 2000 e 2010.<!-- A cada ano, os países membros da ONU são classificados de acordo com essas medidas, que refletem o grau de qualidade de vida local. Nesta visualização exploramos o IDH dos estados brasileiros, bem como todos os dados usados para seu cálculo, nos anos de 1992, 2000 e 2010.--></p>
+            </div>
+            <div class="viz-descricao" id="IDHM"><h2>IDH</h2><p>Índice de Desenvolvimento Humano. Média geométrica dos índices das dimensões Renda, Educação e Longevidade, com pesos iguais.</p></div>
+            <div class="viz-descricao" id="IDHM_E"><h2>IDH Educação</h2><p>Índice sintético da dimensão Educação que é um dos 3 componentes do IDH. É obtido através da média geométrica do subíndice de frequência de crianças e jovens à escola, com peso de 2/3, e do subíndice de escolaridade da população adulta, com peso de 1/3.</p></div>
+            <div class="viz-descricao" id="IDHM_L"><h2>IDH Longevidade</h2><p>Índice da dimensão Longevidade que é um dos 3 componentes do IDH. É obtido a partir do indicador Esperança de vida ao nascer, através da fórmula: [(valor observado do indicador) - (valor mínimo)] / [(valor máximo) - (valor mínimo)], onde os valores mínimo e máximo são 25 e 85 anos, respectivamente. </p></div>
+            <div class="viz-descricao" id="IDHM_R"><h2>IDH Renda</h2><p>Índice da dimensão Renda que é um dos 3 componentes do IDH. É obtido a partir do indicador Renda per capita, através da fórmula: [ln (valor observado do indicador) - ln (valor mínimo)] / [ln (valor máximo) - ln (valor mínimo)], onde os valores mínimo e máximo são R$ 8,00 e R$ 4.033,00 (a preços de agosto de 2010). </p></div>
+            <div class="viz-descricao" id="ESPVIDA"><h2>Esperança de vida ao nascer </h2><p>Número médio de anos que as pessoas deverão viver a partir do nascimento, se permanecerem constantes ao longo da vida o nível e o padrão de mortalidade por idade prevalecentes no ano do Censo.</p></div>
+            <div class="viz-descricao" id="FECTOT"><h2>Taxa de fecundidade total</h2><p>Número médio de filhos que uma mulher deverá ter ao terminar o período reprodutivo (15 a 49 anos de idade).</p></div>
+            <div class="viz-descricao" id="MORT1"><h2>Mortalidade infantil</h2><p>Número de crianças que não deverão sobreviver ao primeiro ano de vida em cada 1000 crianças nascidas vivas.</p></div>
+            <div class="viz-descricao" id="MORT5"><h2>Mortalidade até 5 anos de idade</h2><p>Probabilidade de morrer entre o nascimento e a idade exata de 5 anos, por 1000 crianças nascidas vivas.</p></div>
+            <div class="viz-descricao" id="RAZDEP"><h2>Razão de dependência</h2><p>Razão de dependência é medida pela razão entre o número de pessoas com 14 anos ou menos e de 65 anos ou mais de idade (população dependente) e o número de pessoas com idade de 15 a 64 anos (população potencialmente ativa) multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="SOBRE40"><h2>Probabilidade de sobrevivência até 40 anos</h2><p>Probabilidade de uma criança recém-nascida viver até os 40 anos, se permanecerem constantes ao longo da vida o nível e o padrão de mortalidade por idade prevalecentes no ano do Censo.</p></div>
+            <div class="viz-descricao" id="SOBRE60"><h2>Probabilidade de sobrevivência até 60 anos</h2><p>Probabilidade de uma criança recém-nascida viver até os 60 anos, se permanecerem constantes ao longo da vida o nível e o padrão de mortalidade por idade prevalecentes no ano do Censo.</p></div>
+            <div class="viz-descricao" id="T_ENV"><h2>Taxa de envelhecimento</h2><p>Razão entre a população de 65 anos ou mais de idade e a população total multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="E_ANOSESTUDO"><h2>Expectativa de anos de estudo</h2><p>Número médio de anos de estudo que uma geração de crianças que ingressa na escola deverá completar ao atingir 18 anos de idade, se os padrões atuais se mantiverem ao longo de sua vida escolar.</p></div>
+            <div class="viz-descricao" id="T_ANALF11A14"><h2>Taxa de analfabetismo - 11 a 14 anos</h2><p>Razão entre a população de 11 a 14 anos de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ANALF15A17"><h2>Taxa de analfabetismo - 15 a 17 anos </h2><p>Razão entre a população de 15 a 17 anos de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ANALF15M"><h2>Taxa de analfabetismo - 15 anos ou mais </h2><p>Razão entre a população de 15 anos ou mais de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ANALF18A24"><h2>Taxa de analfabetismo - 18 a 24 anos </h2><p>Razão entre a população de 18 a 24 anos de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ANALF18M"><h2>Taxa de analfabetismo - 18 anos ou mais </h2><p>Razão entre a população de 18 anos ou mais de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ANALF25A29"><h2>Taxa de analfabetismo - 25 a 29 anos </h2><p>Razão entre a população de 25 a 29 anos de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ANALF25M"><h2>Taxa de analfabetismo - 25 anos ou mais</h2><p>Razão entre a população de 25 anos ou mais de idade que não sabe ler nem escrever um bilhete simples e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_0_BASICO"><h2>% de 6 a 17 anos no básico sem atraso</h2><p>Razão entre o número de pessoas de 6 a 17 anos frequentando o ensino básico regular seriado (fundamental + médio) sem atraso idade-série e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 5) - número da série frequentada], na qual o número da série frequentada é 10, 11 e 12 para as pessoas que frequentam a 1ª, a 2ª e a 3ª séries do ensino médio, respectivamente. Foram consideradas sem atraso não só as pessoas para as quais o resultado dessa fórmula foi igual a zero, mas também aquelas para as quais o resultado foi menor do que zero, ou seja, as pessoas com adiantamento idade-série. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_0_FUND"><h2>% de 6 a 14 anos no fundamental sem atraso</h2><p>Razão entre o número de pessoas de 6 a 14 anos frequentando o ensino fundamental regular seriado sem atraso idade-série e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 5) - número da série frequentada] e foram consideradas sem atraso não só as pessoas para as quais o resultado dessa fórmula foi igual a zero, mas também aquelas para as quais o resultado foi menor do que zero, ou seja, as pessoas com adiantamento idade-série. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_0_MED"><h2>% de 15 a 17 anos no médio sem atraso</h2><p>Razão entre o número de pessoas de 15 a 17 anos frequentando o ensino médio regular seriado sem atraso idade-série e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 14) - número da série frequentada] e foram consideradas sem atraso não só as pessoas para as quais o resultado dessa fórmula foi igual a zero, mas também aquelas para as quais o resultado foi menor do que zero, ou seja, as pessoas com adiantamento idade-série. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_1_BASICO"><h2>% de 6 a 17 no básico com 1 ano de atraso</h2><p>Razão entre o número de pessoas de 6 a 17 anos frequentando o ensino básico regular seriado (fundamental + médio) com atraso idade-série de 1 ano e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 5) - número da série frequentada], na qual o número da série frequentada é 10, 11 e 12 para as pessoas que frequentam a 1ª, a 2ª e a 3ª séries do ensino médio, respectivamente. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_1_FUND"><h2>% de 6 a 14 anos no fundamental com 1 ano de atraso</h2><p>Razão entre o número de pessoas de 6 a 14 anos frequentando o ensino fundamental regular seriado com atraso idade-série de 1 ano e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 5) - número da série frequentada]. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_1_MED"><h2>% de 15 a 17 no médio com 1 ano de atraso</h2><p>Razão entre o número de pessoas de 15 a 17 anos frequentando o ensino médio regular seriado com atraso idade-série de 1 ano e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 14) - número da série frequentada]. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_2_BASICO"><h2>% de 6 a 17 anos no básico com 2 anos ou mais de atraso</h2><p>Razão entre o número de pessoas de 6 a 17 anos frequentando o ensino básico regular seriado (fundamental + médio) com atraso idade-série de 2 anos ou mais e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 5) - número da série frequentada], na qual o número da série frequentada é 10, 11 e 12 para as pessoas que frequentam a 1ª, a 2ª e a 3ª séries do ensino médio, respectivamente. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_2_FUND"><h2>% de 6 a 14 anos no fundamental com 2 anos ou mais de atraso</h2><p>Razão entre o número de pessoas de 6 a 14 anos frequentando o ensino fundamental regular seriado com atraso idade-série de 2 anos ou mais e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 5) - número da série frequentada]. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_ATRASO_2_MED"><h2>% de 15 a 17 anos no médio com 2 anos de atraso</h2><p>Razão entre o número de pessoas de 15 a 17 anos frequentando o ensino médio regular seriado com atraso idade-série de 2 anos e o número total de pessoas nessa faixa etária frequentando esse nível de ensino multiplicado por 100. O atraso idade-série é calculado pela fórmula: [(idade - 14) - número da série frequentada]. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_FBBAS"><h2>Taxa de frequência bruta ao básico</h2><p>Razão entre o número total de pessoas de qualquer idade frequentando o ensino básico (fundamental ou médio - regular ou seriado) e a população na faixa etária de 6 a 17 anos multiplicado por 100. As pessoas frequentando a 4ª série do ensino médio foram consideradas como tendo concluído esse nível de ensino. As pessoas de 6 anos ou mais frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_FBFUND"><h2>Taxa de frequência bruta ao fundamental</h2><p>Razão entre o número total de pessoas de qualquer idade frequentando o ensino fundamental regular seriado e a população na faixa etária de 6 a 14 anos multiplicado por 100. As pessoas de 6 anos ou mais frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_FBMED"><h2>Taxa de frequência bruta ao médio</h2><p>Razão entre o número total de pessoas de qualquer idade frequentando o ensino médio regular seriado e a população na faixa etária de 15 a 17 anos multiplicado por 100. As pessoas frequentando a 4ª série do ensino médio foram consideradas como tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_FBPRE"><h2>Taxa de frequência bruta à pré-escola</h2><p>Razão entre o número total de crianças de até 5 anos de idade (somente 5 anos em 1991) frequentando a pré-escola e a população nessa mesma faixa etária multiplicado por 100. As pessoas de 6 anos ou mais frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_FBSUPER"><h2>Taxa de frequência bruta ao superior</h2><p>Razão entre o número total de pessoas de qualquer idade frequentando o ensino superior (graduação, especialização, mestrado ou doutorado) e a população na faixa etária de 18 a 24 anos multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FLBAS"><h2>Taxa de frequência líquida ao básico</h2><p>Razão entre o número de pessoas na faixa etária de 6 a 17 anos frequentando o ensino básico (fundamental ou médio - regular ou seriado) e a população total dessa mesma faixa etária multiplicado por 100. As pessoas de 6 a 17 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental. As pessoas de 6 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_FLFUND"><h2>Taxa de frequência líquida ao fundamental</h2><p>Razão entre o número de pessoas na faixa etária de 6 a 14 anos frequentando o ensino fundamental regular seriado e a população total dessa mesma faixa etária multiplicado por 100. As pessoas de 6 a 14 anos frequentando a pré-escola foram consideradas como se estivessem no 1º ano do ensino fundamental.</p></div>
+            <div class="viz-descricao" id="T_FLMED"><h2>Taxa de frequência líquida ao médio</h2><p>Razão entre o número de pessoas na faixa etária de 15 a 17 anos frequentando o ensino médio regular seriado e a população total dessa mesma faixa etária multiplicado por 100. As pessoas de 15 a 17 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_FLPRE"><h2>Taxa de frequência líquida à pré-escola</h2><p>Razão entre o número de pessoas na faixa etária de 4 e 5 anos (somente 5 anos em 1991) frequentando a pré-escola e a população total dessa mesma faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FLSUPER"><h2>Taxa de frequência líquida ao superior</h2><p>Razão entre o número de pessoas na faixa etária de 18 a 24 anos frequentando o ensino superior (graduação, especialização, mestrado ou doutorado) e a população total dessa mesma faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ11A14"><h2>% de 11 a 14 anos na escola</h2><p>Razão entre a população de 11 a 14 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ15A17"><h2>% de 15 a 17 anos na escola</h2><p>Razão entre a população de 15 a 17 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ18A24"><h2>% de 18 a 24 anos na escola</h2><p>Razão entre a população de 18 a 24 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ25A29"><h2>% de 25 a 29 anos na escola</h2><p>Razão entre a população de 25 a 29 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ5a6 "><h2>% de 5 a 6 anos na escola</h2><p>Razão entre a população de 5 a 6 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ6"><h2>% de 6 anos na escola</h2><p>Razão entre a população de 6 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ6A14"><h2>% de 6 a 14 anos na escola</h2><p>Razão entre a população de 6 a 14 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQ6A17"><h2>% de 6 a 17 anos na escola</h2><p>Razão entre população de 6 a 17 anos de idade que estava frequentando a escola, em qualquer nível ou série e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQFUND1517"><h2>% de 15 a 17 anos no fundamental</h2><p>Razão entre a população de 15 a 17 anos de idade frequentando o ensino fundamental regular seriado e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQFUND1824"><h2>% de 18 a 24 anos no fundamental</h2><p>Razão entre a população de 18 a 24 anos frequentando o ensino fundamental regular seriado e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQMED1824"><h2>% de 18 a 24 anos no médio</h2><p>Razão entre a população de 18 a 24 anos frequentando o ensino médio regular seriado e o total de pessoas nesta faixa etária multiplicado por 100. As pessoas de 18 a 24 anos frequentando a 4a. série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_FREQMED614"><h2>% de 6 a 14 anos no médio</h2><p>Razão entre a população de 6 a 14 anos de idade frequentando o ensino médio regular seriado e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FREQSUPER1517"><h2>% de 15 a 17 anos no superior</h2><p>Razão entre a população de 15 a 17 anos de idade frequentando o ensino superior (graduação, especialização, mestrado ou doutorado) e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND11a13"><h2>% de 11 a 13 anos nos anos finais do fundamental ou com fundamental completo</h2><p>Razão entre a população de 11 a 13 anos de idade que frequenta os quatro anos finais do fundamental (do 6º ao 9º ano desse nível de ensino) ou que já concluiu o fundamental e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND12A14"><h2>% de 12 a 14 anos nos anos finais do fundamental ou com fundamental completo</h2><p>Razão entre a população de 12 a 14 anos de idade que frequenta os quatro anos finais do fundamental (do 6º ao 9º ano desse nível de ensino) ou que já concluiu o fundamental e a população total nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND15A17"><h2>% de 15 a 17 anos com fundamental completo</h2><p>Razão entre a população de 15 a 17 anos de idade que concluiu o ensino fundamental, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND16A18"><h2>% de 16 a 18 anos com fundamental completo</h2><p>Razão entre a população de 16 a 18 anos de idade que já concluiu o ensino fundamental em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND18A24"><h2>% de 18 a 24 anos com fundamental completo</h2><p>Razão entre a população de 18 a 24 anos de idade que concluiu o ensino fundamental, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND18M"><h2>% de 18 anos ou mais com fundamental completo</h2><p>Razão entre a população de 18 anos ou mais de idade que concluiu o ensino fundamental, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUND25M"><h2>% de 25 anos ou mais com fundamental completo</h2><p>Razão entre a população de 25 anos ou mais de idade que concluiu o ensino fundamental, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_MED18a20"><h2>% de 18 a 20 anos com médio completo</h2><p>Razão entre a população de 18 a 20 anos de idade que já concluiu o ensino médio em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100. As pessoas de 18 a 20 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_MED18A24"><h2>% de 18 a 24 anos com médio completo</h2><p>Razão entre a população de 18 a 24 anos de idade que concluiu o ensino médio, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100. Foram consideradas como tendo concluído o ensino médio as pessoas frequentando a 4ª série desse nível.</p></div>
+            <div class="viz-descricao" id="T_MED18M"><h2>% de 18 anos ou mais com médio completo</h2><p>Razão entre a população de 18 anos ou mais de idade que concluiu o ensino médio, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100. Foram consideradas como tendo concluído o ensino médio as pessoas frequentando a 4ª série desse nível.</p></div>
+            <div class="viz-descricao" id="T_MED19A21"><h2>% de 19 a 21 anos com médio completo</h2><p>Razão entre a população de 19 a 21 anos de idade que já concluiu o ensino médio em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100. As pessoas de 19 a 21 anos frequentando a 4ª série do ensino médio foram consideradas como já tendo concluído esse nível de ensino.</p></div>
+            <div class="viz-descricao" id="T_MED25M"><h2>% de 25 anos ou mais com médio completo</h2><p>Razão entre a população de 25 anos ou mais de idade que concluiu o ensino médio, em quaisquer de suas modalidades (regular seriado, não seriado, EJA ou supletivo) e o total de pessoas nesta faixa etária multiplicado por 100. Foram consideradas como tendo concluído o ensino médio as pessoas frequentando a 4ª série desse nível.</p></div>
+            <div class="viz-descricao" id="T_SUPER25M"><h2>% de 25 anos ou mais com superior completo</h2><p>Razão entre a população de 25 anos ou mais de idade que concluiu pelo menos a graduação do ensino superior e o total de pessoas nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="CORTE1"><h2>Renda per capita máxima do 1º quinto mais pobre</h2><p>Valor do 1º quintil da distribuição de indivíduos segundo a renda domiciliar per capita, ou seja, valor máximo da renda domiciliar per capita dos indivíduos pertencentes ao quinto mais pobre dessa distribuição. Valores em reais de 01/agosto/2010.</p></div>
+            <div class="viz-descricao" id="CORTE2"><h2>Renda per capita máxima do 2° quinto mais pobre</h2><p>Valor do 2º quintil da distribuição de indivíduos segundo a renda domiciliar per capita, ou seja, valor máximo da renda domiciliar per capita dos indivíduos pertencentes ao 2º quinto mais pobre dessa distribuição. Valores em reais de 01/agosto/2010.</p></div>
+            <div class="viz-descricao" id="CORTE3"><h2>Renda per capita máxima do 3° quinto mais pobre</h2><p>Valor do 3º quintil da distribuição de indivíduos segundo a renda domiciliar per capita, ou seja, valor máximo da renda domiciliar per capita dos indivíduos pertencentes ao 3º quinto mais pobre dessa distribuição. Valores em reais de 01/agosto/2010.</p></div>
+            <div class="viz-descricao" id="CORTE4"><h2>Renda per capita máxima do 4°quinto mais pobre</h2><p>Valor do 4º quintil da distribuição de indivíduos segundo a renda domiciliar per capita, ou seja, valor máximo da renda domiciliar per capita dos indivíduos pertencentes ao 4º quinto mais pobre dessa distribuição. Valores em reais de 01/agosto/2010.</p></div>
+            <div class="viz-descricao" id="CORTE9"><h2>Renda per capita mínima do décimo mais rico</h2><p>Valor do 9º decil da distribuição de indivíduos segundo a renda domiciliar per capita, ou seja, valor mínimo da renda domiciliar per capita dos indivíduos pertencentes ao décimo mais rico dessa distribuição. Valores em reais de 01/agosto/2010.</p></div>
+            <div class="viz-descricao" id="GINI"><h2>Índice de Gini</h2><p>Mede o grau de desigualdade existente na distribuição de indivíduos segundo a renda domiciliar per capita. Seu valor varia de 0, quando não há desigualdade (a renda domiciliar per capita de todos os indivíduos tem o mesmo valor), a 1, quando a desigualdade é máxima (apenas um indivíduo detém toda a renda).O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PIND"><h2>% de extremamente pobres</h2><p>Proporção dos indivíduos com renda domiciliar per capita igual ou inferior a R$ 70,00 mensais, em reais de agosto de 2010. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PINDCRI"><h2>% de crianças extremamente pobres</h2><p>Proporção dos indivíduos com até 14 anos de idade que têm renda domiciliar per capita igual ou inferior a R$ 70,00 mensais, em reais de agosto de 2010. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PMPOB"><h2>% de pobres</h2><p>Proporção dos indivíduos com renda domiciliar per capita igual ou inferior a R$ 140,00 mensais, em reais de agosto de 2010. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PMPOBCRI"><h2>% de crianças pobres</h2><p>Proporção dos indivíduos com até 14 anos de idade que têm renda domiciliar per capita igual ou inferior a R$ 140,00 mensais, em reais de agosto de 2010. O universo de indivíduos é limitado àqueles com até 14 anos e que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PPOB"><h2>% de vulneráveis à pobreza</h2><p>Proporção dos indivíduos com renda domiciliar per capita igual ou inferior a R$ 255,00 mensais, em reais de agosto de 2010, equivalente a 1/2 salário mínimo nessa data. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PPOBCRI"><h2>% de crianças vulneráveis à pobreza</h2><p>Proporção dos indivíduos com até 14 anos de idade que têm renda domiciliar per capita igual ou inferior a R$ 255,00 mensais, em reais de agosto de 2010, equivalente a 1/2 salário mínimo nessa data. O universo de indivíduos é limitado àqueles com até 14 anos e que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PREN10RICOS"><h2>Percentual da renda apropriada pelos 10% mais ricos</h2><p>Percentual da renda total apropriada pelos indivíduos pertencentes ao décimo mais rico da distribuição dos indivíduos segundo a renda domiciliar per capita. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PREN20"><h2>Percentual da renda apropriada pelos 20% mais pobres</h2><p>Percentual da renda total apropriada pelos indivíduos pertencentes ao quinto mais pobre da distribuição dos indivíduos segundo a renda domiciliar per capita. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PREN20RICOS"><h2>Percentual da renda apropriada pelos 20% mais ricos</h2><p>Percentual da renda total apropriada pelos indivíduos pertencentes ao quinto mais rico da distribuição dos indivíduos segundo a renda domiciliar per capita. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PREN40"><h2>Percentual da renda apropriada pelos 40% mais pobres</h2><p>Percentual da renda total apropriada pelos indivíduos pertencentes aos dois quintos mais pobres da distribuição dos indivíduos segundo a renda domiciliar per capita. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PREN60"><h2>Percentual da renda apropriada pelos 60% mais pobres</h2><p>Percentual da renda total apropriada pelos indivíduos pertencentes aos três quintos mais pobres da distribuição dos indivíduos segundo a renda domiciliar per capita. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PREN80"><h2>Percentual da renda apropriada pelos 80% mais pobres</h2><p>Percentual da renda total apropriada pelos indivíduos pertencentes aos quatro quintos mais pobres da distribuição dos indivíduos segundo a renda domiciliar per capita. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="PRENTRAB"><h2>% da renda proveniente de rendimentos do trabalho</h2><p>Participação percentual das rendas provenientes do trabalho (principal e outros) na renda total, considerando-se apenas as pessoas que vivem em domicílios particulares permanentes. </p></div>
+            <div class="viz-descricao" id="R1040"><h2>Razão 10% mais ricos / 40% mais pobres</h2><p>Medida do grau de desigualdade existente na distribuição de indivíduos segundo a renda domiciliar per capita. Compara a renda per capita média dos indivíduos pertencentes ao décimo mais rico dessa distribuição com a renda capita média dos indivíduos pertencentes aos dois quintos mais pobres. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="R2040"><h2>Razão 20% mais ricos / 40% mais pobres</h2><p>Medida do grau de desigualdade existente na distribuição de indivíduos segundo a renda domiciliar per capita. Compara a renda per capita média dos indivíduos pertencentes ao quinto mais rico dessa distribuição com a renda per capita média dos indivíduos pertencentes aos dois quintos mais pobres. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="RDPC"><h2>Renda per capita </h2><p>Razão entre o somatório da renda de todos os indivíduos residentes em domicílios particulares permanentes e o número total desses indivíduos. Valores em reais de 01/agosto de 2010.</p></div>
+            <div class="viz-descricao" id="RDPC1"><h2>Renda per capita média do 1º quinto mais pobre</h2><p>Média da renda domiciliar per capita dos indivíduos pertencentes ao quinto mais pobre da distribuição de indivíduos segundo a renda domiciliar per capita. Valores em reais de 01/08/2010.</p></div>
+            <div class="viz-descricao" id="RDPC10"><h2>Renda per capita média do décimo mais rico</h2><p>Média da renda domiciliar per capita dos indivíduos pertencentes ao décimo mais rico da distribuição de indivíduos segundo a renda domiciliar per capita. Valores em reais de 01/08/2010.</p></div>
+            <div class="viz-descricao" id="RDPC2"><h2>Renda per capita média do 2º quinto mais pobre</h2><p>Média da renda domiciliar per capita dos indivíduos pertencentes ao 2º quinto mais pobre da distribuição de indivíduos segundo a renda domiciliar per capita. Valores em reais de 01/08/2010.</p></div>
+            <div class="viz-descricao" id="RDPC3"><h2>Renda per capita média do 3º quinto mais pobre</h2><p>Média da renda domiciliar per capita dos indivíduos pertencentes ao 3º quinto mais pobre da distribuição de indivíduos segundo a renda domiciliar per capita. Valores em reais de 01/08/2010.</p></div>
+            <div class="viz-descricao" id="RDPC4"><h2>Renda per capita média do 4º quinto mais pobre</h2><p>Média da renda domiciliar per capita dos indivíduos pertencentes ao 4º quinto mais pobre da distribuição de indivíduos segundo a renda domiciliar per capita. Valores em reais de 01/08/2010.</p></div>
+            <div class="viz-descricao" id="RDPC5"><h2>Renda per capita média do quinto mais rico</h2><p>Média da renda domiciliar per capita dos indivíduos pertencentes ao quinto mais rico da distribuição de indivíduos segundo a renda domiciliar per capita. Valores em reais de 01/08/2010.</p></div>
+            <div class="viz-descricao" id="RDPCT"><h2>Renda per capita , exceto renda nula</h2><p>Razão entre o somatório da renda domiciliar per capita de todos os indivíduos residentes em domicílios particulares permanentes com renda não-nula e o número total desses indivíduos. Valores em reais de 01/agosto de 2010.</p></div>
+            <div class="viz-descricao" id="RIND"><h2>Renda per capita média dos extremamente pobres</h2><p>Média da renda domiciliar per capita das pessoas com renda domiciliar per capita igual ou inferior a R$ 70,00 mensais, a preços de agosto de 2010. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="RMPOB"><h2>Renda per capita média dos pobres</h2><p>Média da renda domiciliar per capita das pessoas com renda domiciliar per capita igual ou inferior a R$ 140,00 mensais, a preços de agosto de 2010. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="RPOB"><h2>Renda per capita média dos vulneráveis à pobreza</h2><p>Média da renda domiciliar per capita das pessoas com renda domiciliar per capita igual ou inferior a R$ 255,00 mensais, a preços de agosto de 2010. O universo de indivíduos é limitado àqueles que vivem em domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="THEIL"><h2>Índice de Theil - L</h2><p>Mede a desigualdade na distribuição de indivíduos segundo a renda domiciliar per capita, excluídos aqueles com renda domiciliar per capita nula. É o logaritmo da razão entre as médias aritmética e geométrica da renda domiciliar per capita dos indivíduos, sendo nulo quando não existir desigualdade de renda entre eles e tendente ao infinito quando a desigualdade tender ao máximo.</p></div>
+            <div class="viz-descricao" id="T_AGUA"><h2>% da população em domicílios com água encanada</h2><p>Razão entre a população que vive em domicílios particulares permanentes com água canalizada para um ou mais cômodos e a população total residente em domicílios particulares permanentes multiplicado por 100. A água pode ser proveniente de rede geral, de poço, de nascente ou de reservatório abastecido por água das chuvas ou carro-pipa.</p></div>
+            <div class="viz-descricao" id="T_BANAGUA"><h2>% da população em domicílios com banheiro e água encanada</h2><p>Razão entre a população que vive em domicílios particulares permanentes com água encanada em pelo menos um de seus cômodos e com banheiro exclusivo e a população total residente em domicílios particulares permanentes multiplicado por 100. A água pode ser proveniente de rede geral, de poço, de nascente ou de reservatório abastecido por água das chuvas ou carro-pipa. Banheiro exclusivo é definido como cômodo que dispõe de chuveiro ou banheira e aparelho sanitário.</p></div>
+            <div class="viz-descricao" id="T_DENS"><h2>% da população em domicílios com densidade > 2</h2><p>Razão entre a população que vive em domicílios particulares permanentes com densidade superior a 2 e a população total residente em domicílios particulares permanentes multiplicado por 100. A densidade do domicílio é dada pela razão entre o total de moradores do domicílio e o número total de cômodos usados como dormitório.</p></div>
+            <div class="viz-descricao" id="T_LIXO"><h2>% da população em domicílios com coleta de lixo</h2><p>Razão entre a população que vive em domicílios com coleta de lixo e a população total residente em domicílios particulares permanentes multiplicado por 100. Estão incluídas as situações em que a coleta de lixo realizada diretamente por empresa pública ou privada, ou o lixo é depositado em caçamba, tanque ou depósito fora do domicílio, para posterior coleta pela prestadora do serviço. São considerados apenas os domicílios particulares permanentes localizados em área urbana.</p></div>
+            <div class="viz-descricao" id="T_LUZ"><h2>% da população em domicílios com energia elétrica</h2><p>Razão entre a população que vive em domicílios particulares permanentes com iluminação elétrica e a população total residente em domicílios particulares permanentes multiplicado por 100. Considera-se iluminação proveniente ou não de uma rede geral, com ou sem medidor.</p></div>
+            <div class="viz-descricao" id="AGUA_ESGOTO"><h2>% de pessoas em domicílios com abastecimento de água e esgotamento sanitário inadequados</h2><p>Razão entre as pessoas que vivem em domicílios cujo abastecimento de água não provem de rede geral e cujo esgotamento sanitário não é realizado por rede coletora de esgoto ou fossa séptica e a população total residente em domicílios particulares permanentes multiplicado por 100. São considerados apenas os domicílios particulares permanentes.
+            </p></div>
+            <div class="viz-descricao" id="T_CRIFUNDIN_TODOS"><h2>% de crianças em domicílios em que ninguém tem fundamental completo</h2><p>Razão entre o número de crianças de até 14 anos que vivem em domicílios em que nenhum dos moradores tem o ensino fundamental completo e a população total nesta faixa etária residente em domicílios particulares permanentes multiplicado por 100. São considerados apenas os domicílios particulares permanentes.
+            </p></div>
+            <div class="viz-descricao" id="T_FORA6A14"><h2>% de crianças de 6 a 14 fora da escola</h2><p>Razão entre as crianças de 6 a 14 anos que não frequenta a escola e o total de crianças nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUNDIN_TODOS"><h2>% de pessoas em domicílios em que ninguém tem fundamental completo</h2><p>Razão entre as pessoas que vivem em domicílios em que nenhum dos moradores tem o ensino fundamental completo e a população total residente em domicílios particulares permanentes multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_FUNDIN_TODOS_MMEIO"><h2>% de pessoas em domicílios vulneráveis à pobreza e em que ninguém tem fundamental completo.</h2><p>Percentual de pessoas que vivem em domicílios vulneráveis à pobreza (com renda per capita inferior a 1/2 salário mínimo de agosto de 2010) e em que ninguém tem o ensino fundamental completo. São considerados apenas os domicílios particulares permanentes.
+            </p></div>
+            <div class="viz-descricao" id="T_M10A14CF"><h2>% de mulheres de 10 a 14 anos que tiveram filhos</h2><p>Razão entre as mulheres de 10 a 14 anos de idade que tiveram filhos e o total de mulheres nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_M15A17CF"><h2>% de mulheres de 15 a 17 anos que tiveram filhos</h2><p>Razão entre as mulheres de 15 a 17 anos de idade que tiveram filhos e o total de mulheres nesta faixa etária multiplicado por 100.</p></div>
+            <div class="viz-descricao" id="T_MULCHEFEFIF014"><h2>% de mães chefes de família sem fundamental completo e com filhos menores de 15 anos</h2><p>Razão entre o número de mulheres que são responsáveis pelo domicílio, não têm o ensino fundamental completo e têm pelo menos 1 filho de idade inferior a 15 anos morando no domicílio e o número total de mulheres chefes de família multiplicado por 100. São considerados apenas os domicílios particulares permanentes.</p></div>
+            <div class="viz-descricao" id="T_RMAXIDOSO"><h2>% de pessoas em domicílios vulneráveis à pobreza e dependentes de idosos</h2><p>Razão entre as pessoas que vivem em domicílios vulneráveis à pobreza (com renda per capita inferior a 1/2 salário mínimo de agosto de 2010) e nos quais a principal fonte de renda provém de moradores com 65 anos ou mais de idade e população total residente em domicílios particulares permanentes multiplicado por 100.
+            </p></div>
+            <div class="viz-descricao" id="T_SLUZ"><h2>% de pessoas em domicílios sem energia elétrica</h2><p>Razão entre as pessoas que vivem em domicílios sem energia elétrica e população total residente em domicílios particulares permanentes multiplicado por 100. 
+            </p></div>
+            <div class="viz-descricao" id="HOMEM0A4"><h2>População masculina de 0 a 4 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM10A14"><h2>População masculina de 10 a 14 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM15A19"><h2>População masculina de 15 a 19 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM20A24"><h2>População masculina de 20 a 24 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM25A29"><h2>População masculina de 25 a 29 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM30A34"><h2>População masculina de 30 a 34 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM35A39"><h2>População masculina de 35 a 39 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM40A44"><h2>População masculina de 40 a 44 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM45A49"><h2>População masculina de 45 a 49 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM50A54"><h2>População masculina de 50 a 54 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM55A59"><h2>População masculina de 55 a 59 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM5A9"><h2>População masculina de 5 a 9 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM60A64"><h2>População masculina de 60 a 64 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM65A69"><h2>População masculina de 65 a 69 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM70A74"><h2>População masculina de 70 a 74 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEM75A79"><h2>População masculina de 75 a 79 anos</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMEMTOT"><h2>População residente masculina</h2><p>População total do sexo masculino</p></div>
+            <div class="viz-descricao" id="HOMENS80"><h2>População masculina com 80 anos e mais</h2><p>População nesta faixa etária e do sexo masculino</p></div>
+            <div class="viz-descricao" id="MULH0A4"><h2>População feminina de 0 a 4 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH10A14"><h2>População feminina de 10 a 14 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH15A19"><h2>População feminina de 15 a 19 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH20A24"><h2>População feminina de 20 a 24 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH25A29"><h2>População feminina de 25 a 29 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH30A34"><h2>População feminina de 30 a 34 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH35A39"><h2>População feminina de 35 a 39 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH40A44"><h2>População feminina de 40 a 44 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH45A49"><h2>População feminina de 45 a 49 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH50A54"><h2>População feminina de 50 a 54 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH55A59"><h2>População feminina de 55 a 59 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH5A9"><h2>População feminina de 5 a 9 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH60A64"><h2>População feminina de 60 a 64 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH65A69"><h2>População feminina de 65 a 69 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH70A74"><h2>População feminina de 70 a 74 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULH75A79"><h2>População feminina de 75 a 79 anos</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULHER80"><h2>População feminina com 80 anos e mais</h2><p>População nesta faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="MULHERTOT"><h2>População residente feminina</h2><p>População total do sexo feminino</p></div>
+            <div class="viz-descricao" id="PESO1114"><h2>População de 11 a 14 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO1113"><h2>População de 11 a 13 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO1214"><h2>População de 12 a 14 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO15"><h2>População de 15 anos ou mais</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO1517"><h2>População de 15 a 17 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO1524"><h2>População de 15 a 24 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO1618"><h2>População de 16 a 18 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO18"><h2>População de 18 anos ou mais</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="Peso1820"><h2>População de 18 a 20 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="Peso1824"><h2>População de 18 a 24 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="Peso1921"><h2>População de 19 a 21 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO25"><h2>População de 25 anos ou mais</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO5"><h2>População de 5 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO6"><h2>População de 6 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO610"><h2>População de 6 a 10 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="Peso617"><h2>População de 6 a 17 anos</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESO65"><h2>População de 65 anos ou mais</h2><p>População residente nessa faixa etária</p></div>
+            <div class="viz-descricao" id="PESOM1014"><h2>Mulheres de 10 a 14 anos</h2><p>População residente nessa faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="PESOM1517"><h2>Mulheres de 15 a 17 anos</h2><p>População residente nessa faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="PESOM15M"><h2>Mulheres de 15 anos ou mais</h2><p>População residente nessa faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="PESOM25M"><h2>Mulheres de 25 anos ou mais</h2><p>População residente nessa faixa etária e do sexo feminino</p></div>
+            <div class="viz-descricao" id="PESORUR"><h2>População rural</h2><p>População residente na área rural</p></div>
+            <div class="viz-descricao" id="PESOTOT"><h2>População total</h2><p>População residente total</p></div>
+            <div class="viz-descricao" id="PESOURB"><h2>População urbana</h2><p>População residente na área urbana</p></div>
+            <div class="viz-descricao" id="POP"><h2>População total em domicílios particulares permanentes</h2><p>População residente em domicílios particulares permanentes. Exclui os residentes em domicílios coletivos, como pensões, hotéis, prisões, quartéis, hospitais. </p></div>
+            <div class="viz-descricao" id="POPT"><h2>População total em domicílios particulares permanentes, exceto com renda nula</h2><p>Refere-se à população residente em domicílios particulares permanentes, excetuando-se aqueles com renda nula. População de referência do Índice de Theil-L.</p></div>
+            <div class="viz-descricao" id="I_ESCOLARIDADE"><h2>Subíndice de escolaridade - IDH Educação</h2><p>Subíndice selecionado para compor o IDH Educação, representando o nível de escolaridade da população adulta. É obtido pelo indicador % de jovens e adultos com 18 anos ou mais com o fundamental completo.</p></div>
+            <div class="viz-descricao" id="I_FREQ_PROP"><h2>Subíndice de frequência escolar - IDH Educação</h2><p>Subíndice selecionado para compor o IDH Educação, representando a frequência de crianças e jovens à escola em  séries adequadas à sua idade.  É obtido através da média aritmética simples de 4  indicadores:  % de crianças de 5 a 6 anos na escola, % de  crianças de 11 a 13 anos no 2º ciclo do fundamental, % de jovens de 15 a 17 anos com o fundamental completo e % de jovens de 18 a 20 anos com o médio completo. </p></div>
+            
+        	<div id="viz-ano"></div>
+        	<div id="viz-mapa"></div>
+            <div class="viz-mapa-label" id="labelAC">Acre</div>
+            <div class="viz-mapa-label" id="labelAL">Alagoas</div>
+            <div class="viz-mapa-label" id="labelAP">Amapá</div>
+            <div class="viz-mapa-label" id="labelAM">Amazonas</div>
+            <div class="viz-mapa-label" id="labelBA">Bahia</div>
+            <div class="viz-mapa-label" id="labelCE">Ceará</div>
+            <div class="viz-mapa-label" id="labelDF">Distrito Federal</div>
+            <div class="viz-mapa-label" id="labelES">Espírito Santo</div>
+            <div class="viz-mapa-label" id="labelGO">Goiás</div>
+            <div class="viz-mapa-label" id="labelMA">Maranhão</div>
+            <div class="viz-mapa-label" id="labelMT">Mato Grosso</div>
+            <div class="viz-mapa-label" id="labelMS">Mato Grosso do Sul</div>
+            <div class="viz-mapa-label" id="labelMG">Minas Gerais</div>
+            <div class="viz-mapa-label" id="labelPA">Pará</div>
+            <div class="viz-mapa-label" id="labelPB">Paraíba</div>
+            <div class="viz-mapa-label" id="labelPR">Paraná</div>
+            <div class="viz-mapa-label" id="labelPE">Pernambuco</div>
+            <div class="viz-mapa-label" id="labelPI">Piauí</div>
+            <div class="viz-mapa-label" id="labelRJ">Rio de Janeiro</div>
+            <div class="viz-mapa-label" id="labelRN">Rio Grande do Norte</div>
+            <div class="viz-mapa-label" id="labelRS">Rio Grande do Sul</div>
+            <div class="viz-mapa-label" id="labelRO">Rondônia</div>
+            <div class="viz-mapa-label" id="labelRR">Roraima</div>
+            <div class="viz-mapa-label" id="labelSC">Santa Catarina</div>
+            <div class="viz-mapa-label" id="labelSP">São Paulo</div>
+            <div class="viz-mapa-label" id="labelSE">Sergipe</div>
+            <div class="viz-mapa-label" id="labelTO">Tocantins</div>
+        </div>
+    	<div id="viz-ranking">
+        	<div class="viz-select" id="select-barras">
+            	<form>
+                	<p class="legenda">Ranking & Cores</p>
+                	<select class="chosen-select" id="xBarrasSel" style="width:140px;">
+                        <option value="IDHM" selected>IDH</option>
+                        <option value="IDHM_E">IDH Educação</option>
+                        <option value="IDHM_L">IDH Longevidade</option>
+                        <option value="IDHM_R">IDH Renda</option>
+                        <option value="ESPVIDA">Esperança de vida ao nascer </option>
+                        <option value="FECTOT">Taxa de fecundidade total</option>
+                        <option value="MORT1">Mortalidade infantil</option>
+                        <option value="MORT5">Mortalidade até 5 anos de idade</option>
+                        <option value="RAZDEP">Razão de dependência</option>
+                        <option value="SOBRE40">Probabilidade de sobrevivência até 40 anos</option>
+                        <option value="SOBRE60">Probabilidade de sobrevivência até 60 anos</option>
+                        <option value="T_ENV">Taxa de envelhecimento</option>
+                        <option value="E_ANOSESTUDO">Expectativa de anos de estudo</option>
+                        <option value="T_ANALF11A14">Taxa de analfabetismo - 11 a 14 anos</option>
+                        <option value="T_ANALF15A17">Taxa de analfabetismo - 15 a 17 anos </option>
+                        <option value="T_ANALF15M">Taxa de analfabetismo - 15 anos ou mais </option>
+                        <option value="T_ANALF18A24">Taxa de analfabetismo - 18 a 24 anos </option>
+                        <option value="T_ANALF18M">Taxa de analfabetismo - 18 anos ou mais </option>
+                        <option value="T_ANALF25A29">Taxa de analfabetismo - 25 a 29 anos </option>
+                        <option value="T_ANALF25M">Taxa de analfabetismo - 25 anos ou mais</option>
+                        <option value="T_ATRASO_0_BASICO">% de 6 a 17 anos no básico sem atraso</option>
+                        <option value="T_ATRASO_0_FUND">% de 6 a 14 anos no fundamental sem atraso</option>
+                        <option value="T_ATRASO_0_MED">% de 15 a 17 anos no médio sem atraso</option>
+                        <option value="T_ATRASO_1_BASICO">% de 6 a 17 no básico com 1 ano de atraso</option>
+                        <option value="T_ATRASO_1_FUND">% de 6 a 14 anos no fundamental com 1 ano de atraso</option>
+                        <option value="T_ATRASO_1_MED">% de 15 a 17 no médio com 1 ano de atraso</option>
+                        <option value="T_ATRASO_2_BASICO">% de 6 a 17 anos no básico com 2 anos ou mais de atraso</option>
+                        <option value="T_ATRASO_2_FUND">% de 6 a 14 anos no fundamental com 2 anos ou mais de atraso</option>
+                        <option value="T_ATRASO_2_MED">% de 15 a 17 anos no médio com 2 anos de atraso</option>
+                        <option value="T_FBBAS">Taxa de frequência bruta ao básico</option>
+                        <option value="T_FBFUND">Taxa de frequência bruta ao fundamental</option>
+                        <option value="T_FBMED">Taxa de frequência bruta ao médio</option>
+                        <option value="T_FBPRE">Taxa de frequência bruta à pré-escola</option>
+                        <option value="T_FBSUPER">Taxa de frequência bruta ao superior</option>
+                        <option value="T_FLBAS">Taxa de frequência líquida ao básico</option>
+                        <option value="T_FLFUND">Taxa de frequência líquida ao fundamental</option>
+                        <option value="T_FLMED">Taxa de frequência líquida ao médio</option>
+                        <option value="T_FLPRE">Taxa de frequência líquida à pré-escola</option>
+                        <option value="T_FLSUPER">Taxa de frequência líquida ao superior</option>
+                        <option value="T_FREQ11A14">% de 11 a 14 anos na escola</option>
+                        <option value="T_FREQ15A17">% de 15 a 17 anos na escola</option>
+                        <option value="T_FREQ18A24">% de 18 a 24 anos na escola</option>
+                        <option value="T_FREQ25A29">% de 25 a 29 anos na escola</option>
+                        <option value="T_FREQ5a6 ">% de 5 a 6 anos na escola</option>
+                        <option value="T_FREQ6">% de 6 anos na escola</option>
+                        <option value="T_FREQ6A14">% de 6 a 14 anos na escola</option>
+                        <option value="T_FREQ6A17">% de 6 a 17 anos na escola</option>
+                        <option value="T_FREQFUND1517">% de 15 a 17 anos no fundamental</option>
+                        <option value="T_FREQFUND1824">% de 18 a 24 anos no fundamental</option>
+                        <option value="T_FREQMED1824">% de 18 a 24 anos no médio</option>
+                        <option value="T_FREQMED614">% de 6 a 14 anos no médio</option>
+                        <option value="T_FREQSUPER1517">% de 15 a 17 anos no superior</option>
+                        <option value="T_FUND11a13">% de 11 a 13 anos nos anos finais do fundamental ou com fundamental completo</option>
+                        <option value="T_FUND12A14">% de 12 a 14 anos nos anos finais do fundamental ou com fundamental completo</option>
+                        <option value="T_FUND15A17">% de 15 a 17 anos com fundamental completo</option>
+                        <option value="T_FUND16A18">% de 16 a 18 anos com fundamental completo</option>
+                        <option value="T_FUND18A24">% de 18 a 24 anos com fundamental completo</option>
+                        <option value="T_FUND18M">% de 18 anos ou mais com fundamental completo</option>
+                        <option value="T_FUND25M">% de 25 anos ou mais com fundamental completo</option>
+                        <option value="T_MED18a20">% de 18 a 20 anos com médio completo</option>
+                        <option value="T_MED18A24">% de 18 a 24 anos com médio completo</option>
+                        <option value="T_MED18M">% de 18 anos ou mais com médio completo</option>
+                        <option value="T_MED19A21">% de 19 a 21 anos com médio completo</option>
+                        <option value="T_MED25M">% de 25 anos ou mais com médio completo</option>
+                        <option value="T_SUPER25M">% de 25 anos ou mais com superior completo</option>
+                        <option value="CORTE1">Renda per capita máxima do 1º quinto mais pobre</option>
+                        <option value="CORTE2">Renda per capita máxima do 2° quinto mais pobre</option>
+                        <option value="CORTE3">Renda per capita máxima do 3° quinto mais pobre</option>
+                        <option value="CORTE4">Renda per capita máxima do 4°quinto mais pobre</option>
+                        <option value="CORTE9">Renda per capita mínima do décimo mais rico</option>
+                        <option value="GINI">Índice de Gini</option>
+                        <option value="PIND">% de extremamente pobres</option>
+                        <option value="PINDCRI">% de crianças extremamente pobres</option>
+                        <option value="PMPOB">% de pobres</option>
+                        <option value="PMPOBCRI">% de crianças pobres</option>
+                        <option value="PPOB">% de vulneráveis à pobreza</option>
+                        <option value="PPOBCRI">% de crianças vulneráveis à pobreza</option>
+                        <option value="PREN10RICOS">Percentual da renda apropriada pelos 10% mais ricos</option>
+                        <option value="PREN20">Percentual da renda apropriada pelos 20% mais pobres</option>
+                        <option value="PREN20RICOS">Percentual da renda apropriada pelos 20% mais ricos</option>
+                        <option value="PREN40">Percentual da renda apropriada pelos 40% mais pobres</option>
+                        <option value="PREN60">Percentual da renda apropriada pelos 60% mais pobres</option>
+                        <option value="PREN80">Percentual da renda apropriada pelos 80% mais pobres</option>
+                        <option value="PRENTRAB">% da renda proveniente de rendimentos do trabalho</option>
+                        <option value="R1040">Razão 10% mais ricos / 40% mais pobres</option>
+                        <option value="R2040">Razão 20% mais ricos / 40% mais pobres</option>
+                        <option value="RDPC">Renda per capita </option>
+                        <option value="RDPC1">Renda per capita média do 1º quinto mais pobre</option>
+                        <option value="RDPC10">Renda per capita média do décimo mais rico</option>
+                        <option value="RDPC2">Renda per capita média do 2º quinto mais pobre</option>
+                        <option value="RDPC3">Renda per capita média do 3º quinto mais pobre</option>
+                        <option value="RDPC4">Renda per capita média do 4º quinto mais pobre</option>
+                        <option value="RDPC5">Renda per capita média do quinto mais rico</option>
+                        <option value="RDPCT">Renda per capita , exceto renda nula</option>
+                        <option value="RIND">Renda per capita média dos extremamente pobres</option>
+                        <option value="RMPOB">Renda per capita média dos pobres</option>
+                        <option value="RPOB">Renda per capita média dos vulneráveis à pobreza</option>
+                        <option value="THEIL">Índice de Theil - L</option>
+                        <option value="T_AGUA">% da população em domicílios com água encanada</option>
+                        <option value="T_BANAGUA">% da população em domicílios com banheiro e água encanada</option>
+                        <option value="T_DENS">% da população em domicílios com densidade > 2</option>
+                        <option value="T_LIXO">% da população em domicílios com coleta de lixo</option>
+                        <option value="T_LUZ">% da população em domicílios com energia elétrica</option>
+                        <option value="AGUA_ESGOTO">% de pessoas em domicílios com abastecimento de água e esgotamento sanitário inadequados</option>
+                        <option value="T_CRIFUNDIN_TODOS">% de crianças em domicílios em que ninguém tem fundamental completo</option>
+                        <option value="T_FORA6A14">% de crianças de 6 a 14 fora da escola</option>
+                        <option value="T_FUNDIN_TODOS">% de pessoas em domicílios em que ninguém tem fundamental completo</option>
+                        <option value="T_FUNDIN_TODOS_MMEIO">% de pessoas em domicílios vulneráveis à pobreza e em que ninguém tem fundamental completo.</option>
+                        <option value="T_M10A14CF">% de mulheres de 10 a 14 anos que tiveram filhos</option>
+                        <option value="T_M15A17CF">% de mulheres de 15 a 17 anos que tiveram filhos</option>
+                        <option value="T_MULCHEFEFIF014">% de mães chefes de família sem fundamental completo e com filhos menores de 15 anos</option>
+                        <option value="T_RMAXIDOSO">% de pessoas em domicílios vulneráveis à pobreza e dependentes de idosos</option>
+                        <option value="T_SLUZ">% de pessoas em domicílios sem energia elétrica</option>
+                        <option value="HOMEM0A4">População masculina de 0 a 4 anos</option>
+                        <option value="HOMEM10A14">População masculina de 10 a 14 anos</option>
+                        <option value="HOMEM15A19">População masculina de 15 a 19 anos</option>
+                        <option value="HOMEM20A24">População masculina de 20 a 24 anos</option>
+                        <option value="HOMEM25A29">População masculina de 25 a 29 anos</option>
+                        <option value="HOMEM30A34">População masculina de 30 a 34 anos</option>
+                        <option value="HOMEM35A39">População masculina de 35 a 39 anos</option>
+                        <option value="HOMEM40A44">População masculina de 40 a 44 anos</option>
+                        <option value="HOMEM45A49">População masculina de 45 a 49 anos</option>
+                        <option value="HOMEM50A54">População masculina de 50 a 54 anos</option>
+                        <option value="HOMEM55A59">População masculina de 55 a 59 anos</option>
+                        <option value="HOMEM5A9">População masculina de 5 a 9 anos</option>
+                        <option value="HOMEM60A64">População masculina de 60 a 64 anos</option>
+                        <option value="HOMEM65A69">População masculina de 65 a 69 anos</option>
+                        <option value="HOMEM70A74">População masculina de 70 a 74 anos</option>
+                        <option value="HOMEM75A79">População masculina de 75 a 79 anos</option>
+                        <option value="HOMEMTOT">População residente masculina</option>
+                        <option value="HOMENS80">População masculina com 80 anos e mais</option>
+                        <option value="MULH0A4">População feminina de 0 a 4 anos</option>
+                        <option value="MULH10A14">População feminina de 10 a 14 anos</option>
+                        <option value="MULH15A19">População feminina de 15 a 19 anos</option>
+                        <option value="MULH20A24">População feminina de 20 a 24 anos</option>
+                        <option value="MULH25A29">População feminina de 25 a 29 anos</option>
+                        <option value="MULH30A34">População feminina de 30 a 34 anos</option>
+                        <option value="MULH35A39">População feminina de 35 a 39 anos</option>
+                        <option value="MULH40A44">População feminina de 40 a 44 anos</option>
+                        <option value="MULH45A49">População feminina de 45 a 49 anos</option>
+                        <option value="MULH50A54">População feminina de 50 a 54 anos</option>
+                        <option value="MULH55A59">População feminina de 55 a 59 anos</option>
+                        <option value="MULH5A9">População feminina de 5 a 9 anos</option>
+                        <option value="MULH60A64">População feminina de 60 a 64 anos</option>
+                        <option value="MULH65A69">População feminina de 65 a 69 anos</option>
+                        <option value="MULH70A74">População feminina de 70 a 74 anos</option>
+                        <option value="MULH75A79">População feminina de 75 a 79 anos</option>
+                        <option value="MULHER80">População feminina com 80 anos e mais</option>
+                        <option value="MULHERTOT">População residente feminina</option>
+                        <option value="PESO1114">População de 11 a 14 anos</option>
+                        <option value="PESO1113">População de 11 a 13 anos</option>
+                        <option value="PESO1214">População de 12 a 14 anos</option>
+                        <option value="PESO15">População de 15 anos ou mais</option>
+                        <option value="PESO1517">População de 15 a 17 anos</option>
+                        <option value="PESO1524">População de 15 a 24 anos</option>
+                        <option value="PESO1618">População de 16 a 18 anos</option>
+                        <option value="PESO18">População de 18 anos ou mais</option>
+                        <option value="Peso1820">População de 18 a 20 anos</option>
+                        <option value="Peso1824">População de 18 a 24 anos</option>
+                        <option value="Peso1921">População de 19 a 21 anos</option>
+                        <option value="PESO25">População de 25 anos ou mais</option>
+                        <option value="PESO5">População de 5 anos</option>
+                        <option value="PESO6">População de 6 anos</option>
+                        <option value="PESO610">População de 6 a 10 anos</option>
+                        <option value="Peso617">População de 6 a 17 anos</option>
+                        <option value="PESO65">População de 65 anos ou mais</option>
+                        <option value="PESOM1014">Mulheres de 10 a 14 anos</option>
+                        <option value="PESOM1517">Mulheres de 15 a 17 anos</option>
+                        <option value="PESOM15M">Mulheres de 15 anos ou mais</option>
+                        <option value="PESOM25M">Mulheres de 25 anos ou mais</option>
+                        <option value="PESORUR">População rural</option>
+                        <option value="PESOTOT">População total</option>
+                        <option value="PESOURB">População urbana</option>
+                        <option value="POP">População total em domicílios particulares permanentes</option>
+                        <option value="POPT">População total em domicílios particulares permanentes, exceto com renda nula</option>
+                        <option value="I_ESCOLARIDADE">Subíndice de escolaridade - IDH Educação</option>
+                        <option value="I_FREQ_PROP">Subíndice de frequência escolar - IDH Educação</option>
+                    </select>
+                </form>
+            </div>
+        	<div id="viz-barras"></div>
+        </div>
+    	<div id="viz-main">
+        	<div id="viz-scatter">
+            	<div id="select-scatter">
+                    <div class="viz-select" id="select-scatter-unit">
+                        <form>
+                            <p class="legenda">Eixo-y</p>
+                            <select class="chosen-select" id="yScatterSel" style="width:185px;">
+                                <option value="IDHM">IDH</option>
+                                <option value="IDHM_E">IDH Educação</option>
+                                <option value="IDHM_L" selected>IDH Longevidade</option>
+                                <option value="IDHM_R">IDH Renda</option>
+                                <option value="ESPVIDA">Esperança de vida ao nascer </option>
+                                <option value="FECTOT">Taxa de fecundidade total</option>
+                                <option value="MORT1">Mortalidade infantil</option>
+                                <option value="MORT5">Mortalidade até 5 anos de idade</option>
+                                <option value="RAZDEP">Razão de dependência</option>
+                                <option value="SOBRE40">Probabilidade de sobrevivência até 40 anos</option>
+                                <option value="SOBRE60">Probabilidade de sobrevivência até 60 anos</option>
+                                <option value="T_ENV">Taxa de envelhecimento</option>
+                                <option value="E_ANOSESTUDO">Expectativa de anos de estudo</option>
+                                <option value="T_ANALF11A14">Taxa de analfabetismo - 11 a 14 anos</option>
+                                <option value="T_ANALF15A17">Taxa de analfabetismo - 15 a 17 anos </option>
+                                <option value="T_ANALF15M">Taxa de analfabetismo - 15 anos ou mais </option>
+                                <option value="T_ANALF18A24">Taxa de analfabetismo - 18 a 24 anos </option>
+                                <option value="T_ANALF18M">Taxa de analfabetismo - 18 anos ou mais </option>
+                                <option value="T_ANALF25A29">Taxa de analfabetismo - 25 a 29 anos </option>
+                                <option value="T_ANALF25M">Taxa de analfabetismo - 25 anos ou mais</option>
+                                <option value="T_ATRASO_0_BASICO">% de 6 a 17 anos no básico sem atraso</option>
+                                <option value="T_ATRASO_0_FUND">% de 6 a 14 anos no fundamental sem atraso</option>
+                                <option value="T_ATRASO_0_MED">% de 15 a 17 anos no médio sem atraso</option>
+                                <option value="T_ATRASO_1_BASICO">% de 6 a 17 no básico com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_FUND">% de 6 a 14 anos no fundamental com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_MED">% de 15 a 17 no médio com 1 ano de atraso</option>
+                                <option value="T_ATRASO_2_BASICO">% de 6 a 17 anos no básico com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_FUND">% de 6 a 14 anos no fundamental com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_MED">% de 15 a 17 anos no médio com 2 anos de atraso</option>
+                                <option value="T_FBBAS">Taxa de frequência bruta ao básico</option>
+                                <option value="T_FBFUND">Taxa de frequência bruta ao fundamental</option>
+                                <option value="T_FBMED">Taxa de frequência bruta ao médio</option>
+                                <option value="T_FBPRE">Taxa de frequência bruta à pré-escola</option>
+                                <option value="T_FBSUPER">Taxa de frequência bruta ao superior</option>
+                                <option value="T_FLBAS">Taxa de frequência líquida ao básico</option>
+                                <option value="T_FLFUND">Taxa de frequência líquida ao fundamental</option>
+                                <option value="T_FLMED">Taxa de frequência líquida ao médio</option>
+                                <option value="T_FLPRE">Taxa de frequência líquida à pré-escola</option>
+                                <option value="T_FLSUPER">Taxa de frequência líquida ao superior</option>
+                                <option value="T_FREQ11A14">% de 11 a 14 anos na escola</option>
+                                <option value="T_FREQ15A17">% de 15 a 17 anos na escola</option>
+                                <option value="T_FREQ18A24">% de 18 a 24 anos na escola</option>
+                                <option value="T_FREQ25A29">% de 25 a 29 anos na escola</option>
+                                <option value="T_FREQ5a6 ">% de 5 a 6 anos na escola</option>
+                                <option value="T_FREQ6">% de 6 anos na escola</option>
+                                <option value="T_FREQ6A14">% de 6 a 14 anos na escola</option>
+                                <option value="T_FREQ6A17">% de 6 a 17 anos na escola</option>
+                                <option value="T_FREQFUND1517">% de 15 a 17 anos no fundamental</option>
+                                <option value="T_FREQFUND1824">% de 18 a 24 anos no fundamental</option>
+                                <option value="T_FREQMED1824">% de 18 a 24 anos no médio</option>
+                                <option value="T_FREQMED614">% de 6 a 14 anos no médio</option>
+                                <option value="T_FREQSUPER1517">% de 15 a 17 anos no superior</option>
+                                <option value="T_FUND11a13">% de 11 a 13 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND12A14">% de 12 a 14 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND15A17">% de 15 a 17 anos com fundamental completo</option>
+                                <option value="T_FUND16A18">% de 16 a 18 anos com fundamental completo</option>
+                                <option value="T_FUND18A24">% de 18 a 24 anos com fundamental completo</option>
+                                <option value="T_FUND18M">% de 18 anos ou mais com fundamental completo</option>
+                                <option value="T_FUND25M">% de 25 anos ou mais com fundamental completo</option>
+                                <option value="T_MED18a20">% de 18 a 20 anos com médio completo</option>
+                                <option value="T_MED18A24">% de 18 a 24 anos com médio completo</option>
+                                <option value="T_MED18M">% de 18 anos ou mais com médio completo</option>
+                                <option value="T_MED19A21">% de 19 a 21 anos com médio completo</option>
+                                <option value="T_MED25M">% de 25 anos ou mais com médio completo</option>
+                                <option value="T_SUPER25M">% de 25 anos ou mais com superior completo</option>
+                                <option value="CORTE1">Renda per capita máxima do 1º quinto mais pobre</option>
+                                <option value="CORTE2">Renda per capita máxima do 2° quinto mais pobre</option>
+                                <option value="CORTE3">Renda per capita máxima do 3° quinto mais pobre</option>
+                                <option value="CORTE4">Renda per capita máxima do 4°quinto mais pobre</option>
+                                <option value="CORTE9">Renda per capita mínima do décimo mais rico</option>
+                                <option value="GINI">Índice de Gini</option>
+                                <option value="PIND">% de extremamente pobres</option>
+                                <option value="PINDCRI">% de crianças extremamente pobres</option>
+                                <option value="PMPOB">% de pobres</option>
+                                <option value="PMPOBCRI">% de crianças pobres</option>
+                                <option value="PPOB">% de vulneráveis à pobreza</option>
+                                <option value="PPOBCRI">% de crianças vulneráveis à pobreza</option>
+                                <option value="PREN10RICOS">Percentual da renda apropriada pelos 10% mais ricos</option>
+                                <option value="PREN20">Percentual da renda apropriada pelos 20% mais pobres</option>
+                                <option value="PREN20RICOS">Percentual da renda apropriada pelos 20% mais ricos</option>
+                                <option value="PREN40">Percentual da renda apropriada pelos 40% mais pobres</option>
+                                <option value="PREN60">Percentual da renda apropriada pelos 60% mais pobres</option>
+                                <option value="PREN80">Percentual da renda apropriada pelos 80% mais pobres</option>
+                                <option value="PRENTRAB">% da renda proveniente de rendimentos do trabalho</option>
+                                <option value="R1040">Razão 10% mais ricos / 40% mais pobres</option>
+                                <option value="R2040">Razão 20% mais ricos / 40% mais pobres</option>
+                                <option value="RDPC">Renda per capita </option>
+                                <option value="RDPC1">Renda per capita média do 1º quinto mais pobre</option>
+                                <option value="RDPC10">Renda per capita média do décimo mais rico</option>
+                                <option value="RDPC2">Renda per capita média do 2º quinto mais pobre</option>
+                                <option value="RDPC3">Renda per capita média do 3º quinto mais pobre</option>
+                                <option value="RDPC4">Renda per capita média do 4º quinto mais pobre</option>
+                                <option value="RDPC5">Renda per capita média do quinto mais rico</option>
+                                <option value="RDPCT">Renda per capita , exceto renda nula</option>
+                                <option value="RIND">Renda per capita média dos extremamente pobres</option>
+                                <option value="RMPOB">Renda per capita média dos pobres</option>
+                                <option value="RPOB">Renda per capita média dos vulneráveis à pobreza</option>
+                                <option value="THEIL">Índice de Theil - L</option>
+                                <option value="T_AGUA">% da população em domicílios com água encanada</option>
+                                <option value="T_BANAGUA">% da população em domicílios com banheiro e água encanada</option>
+                                <option value="T_DENS">% da população em domicílios com densidade > 2</option>
+                                <option value="T_LIXO">% da população em domicílios com coleta de lixo</option>
+                                <option value="T_LUZ">% da população em domicílios com energia elétrica</option>
+                                <option value="AGUA_ESGOTO">% de pessoas em domicílios com abastecimento de água e esgotamento sanitário inadequados</option>
+                                <option value="T_CRIFUNDIN_TODOS">% de crianças em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FORA6A14">% de crianças de 6 a 14 fora da escola</option>
+                                <option value="T_FUNDIN_TODOS">% de pessoas em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FUNDIN_TODOS_MMEIO">% de pessoas em domicílios vulneráveis à pobreza e em que ninguém tem fundamental completo.</option>
+                                <option value="T_M10A14CF">% de mulheres de 10 a 14 anos que tiveram filhos</option>
+                                <option value="T_M15A17CF">% de mulheres de 15 a 17 anos que tiveram filhos</option>
+                                <option value="T_MULCHEFEFIF014">% de mães chefes de família sem fundamental completo e com filhos menores de 15 anos</option>
+                                <option value="T_RMAXIDOSO">% de pessoas em domicílios vulneráveis à pobreza e dependentes de idosos</option>
+                                <option value="T_SLUZ">% de pessoas em domicílios sem energia elétrica</option>
+                                <option value="HOMEM0A4">População masculina de 0 a 4 anos</option>
+                                <option value="HOMEM10A14">População masculina de 10 a 14 anos</option>
+                                <option value="HOMEM15A19">População masculina de 15 a 19 anos</option>
+                                <option value="HOMEM20A24">População masculina de 20 a 24 anos</option>
+                                <option value="HOMEM25A29">População masculina de 25 a 29 anos</option>
+                                <option value="HOMEM30A34">População masculina de 30 a 34 anos</option>
+                                <option value="HOMEM35A39">População masculina de 35 a 39 anos</option>
+                                <option value="HOMEM40A44">População masculina de 40 a 44 anos</option>
+                                <option value="HOMEM45A49">População masculina de 45 a 49 anos</option>
+                                <option value="HOMEM50A54">População masculina de 50 a 54 anos</option>
+                                <option value="HOMEM55A59">População masculina de 55 a 59 anos</option>
+                                <option value="HOMEM5A9">População masculina de 5 a 9 anos</option>
+                                <option value="HOMEM60A64">População masculina de 60 a 64 anos</option>
+                                <option value="HOMEM65A69">População masculina de 65 a 69 anos</option>
+                                <option value="HOMEM70A74">População masculina de 70 a 74 anos</option>
+                                <option value="HOMEM75A79">População masculina de 75 a 79 anos</option>
+                                <option value="HOMEMTOT">População residente masculina</option>
+                                <option value="HOMENS80">População masculina com 80 anos e mais</option>
+                                <option value="MULH0A4">População feminina de 0 a 4 anos</option>
+                                <option value="MULH10A14">População feminina de 10 a 14 anos</option>
+                                <option value="MULH15A19">População feminina de 15 a 19 anos</option>
+                                <option value="MULH20A24">População feminina de 20 a 24 anos</option>
+                                <option value="MULH25A29">População feminina de 25 a 29 anos</option>
+                                <option value="MULH30A34">População feminina de 30 a 34 anos</option>
+                                <option value="MULH35A39">População feminina de 35 a 39 anos</option>
+                                <option value="MULH40A44">População feminina de 40 a 44 anos</option>
+                                <option value="MULH45A49">População feminina de 45 a 49 anos</option>
+                                <option value="MULH50A54">População feminina de 50 a 54 anos</option>
+                                <option value="MULH55A59">População feminina de 55 a 59 anos</option>
+                                <option value="MULH5A9">População feminina de 5 a 9 anos</option>
+                                <option value="MULH60A64">População feminina de 60 a 64 anos</option>
+                                <option value="MULH65A69">População feminina de 65 a 69 anos</option>
+                                <option value="MULH70A74">População feminina de 70 a 74 anos</option>
+                                <option value="MULH75A79">População feminina de 75 a 79 anos</option>
+                                <option value="MULHER80">População feminina com 80 anos e mais</option>
+                                <option value="MULHERTOT">População residente feminina</option>
+                                <option value="PESO1114">População de 11 a 14 anos</option>
+                                <option value="PESO1113">População de 11 a 13 anos</option>
+                                <option value="PESO1214">População de 12 a 14 anos</option>
+                                <option value="PESO15">População de 15 anos ou mais</option>
+                                <option value="PESO1517">População de 15 a 17 anos</option>
+                                <option value="PESO1524">População de 15 a 24 anos</option>
+                                <option value="PESO1618">População de 16 a 18 anos</option>
+                                <option value="PESO18">População de 18 anos ou mais</option>
+                                <option value="Peso1820">População de 18 a 20 anos</option>
+                                <option value="Peso1824">População de 18 a 24 anos</option>
+                                <option value="Peso1921">População de 19 a 21 anos</option>
+                                <option value="PESO25">População de 25 anos ou mais</option>
+                                <option value="PESO5">População de 5 anos</option>
+                                <option value="PESO6">População de 6 anos</option>
+                                <option value="PESO610">População de 6 a 10 anos</option>
+                                <option value="Peso617">População de 6 a 17 anos</option>
+                                <option value="PESO65">População de 65 anos ou mais</option>
+                                <option value="PESOM1014">Mulheres de 10 a 14 anos</option>
+                                <option value="PESOM1517">Mulheres de 15 a 17 anos</option>
+                                <option value="PESOM15M">Mulheres de 15 anos ou mais</option>
+                                <option value="PESOM25M">Mulheres de 25 anos ou mais</option>
+                                <option value="PESORUR">População rural</option>
+                                <option value="PESOTOT">População total</option>
+                                <option value="PESOURB">População urbana</option>
+                                <option value="POP">População total em domicílios particulares permanentes</option>
+                                <option value="POPT">População total em domicílios particulares permanentes, exceto com renda nula</option>
+                                <option value="I_ESCOLARIDADE">Subíndice de escolaridade - IDH Educação</option>
+                                <option value="I_FREQ_PROP">Subíndice de frequência escolar - IDH Educação</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="viz-select" id="select-scatter-unit">
+                        <form>
+                            <p class="legenda">Eixo-x</p>
+                            <select class="chosen-select" id="xScatterSel" style="width:185px;">
+                                <option value="IDHM">IDH</option>
+                                <option value="IDHM_E" selected>IDH Educação</option>
+                                <option value="IDHM_L">IDH Longevidade</option>
+                                <option value="IDHM_R">IDH Renda</option>
+                                <option value="ESPVIDA">Esperança de vida ao nascer </option>
+                                <option value="FECTOT">Taxa de fecundidade total</option>
+                                <option value="MORT1">Mortalidade infantil</option>
+                                <option value="MORT5">Mortalidade até 5 anos de idade</option>
+                                <option value="RAZDEP">Razão de dependência</option>
+                                <option value="SOBRE40">Probabilidade de sobrevivência até 40 anos</option>
+                                <option value="SOBRE60">Probabilidade de sobrevivência até 60 anos</option>
+                                <option value="T_ENV">Taxa de envelhecimento</option>
+                                <option value="E_ANOSESTUDO">Expectativa de anos de estudo</option>
+                                <option value="T_ANALF11A14">Taxa de analfabetismo - 11 a 14 anos</option>
+                                <option value="T_ANALF15A17">Taxa de analfabetismo - 15 a 17 anos </option>
+                                <option value="T_ANALF15M">Taxa de analfabetismo - 15 anos ou mais </option>
+                                <option value="T_ANALF18A24">Taxa de analfabetismo - 18 a 24 anos </option>
+                                <option value="T_ANALF18M">Taxa de analfabetismo - 18 anos ou mais </option>
+                                <option value="T_ANALF25A29">Taxa de analfabetismo - 25 a 29 anos </option>
+                                <option value="T_ANALF25M">Taxa de analfabetismo - 25 anos ou mais</option>
+                                <option value="T_ATRASO_0_BASICO">% de 6 a 17 anos no básico sem atraso</option>
+                                <option value="T_ATRASO_0_FUND">% de 6 a 14 anos no fundamental sem atraso</option>
+                                <option value="T_ATRASO_0_MED">% de 15 a 17 anos no médio sem atraso</option>
+                                <option value="T_ATRASO_1_BASICO">% de 6 a 17 no básico com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_FUND">% de 6 a 14 anos no fundamental com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_MED">% de 15 a 17 no médio com 1 ano de atraso</option>
+                                <option value="T_ATRASO_2_BASICO">% de 6 a 17 anos no básico com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_FUND">% de 6 a 14 anos no fundamental com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_MED">% de 15 a 17 anos no médio com 2 anos de atraso</option>
+                                <option value="T_FBBAS">Taxa de frequência bruta ao básico</option>
+                                <option value="T_FBFUND">Taxa de frequência bruta ao fundamental</option>
+                                <option value="T_FBMED">Taxa de frequência bruta ao médio</option>
+                                <option value="T_FBPRE">Taxa de frequência bruta à pré-escola</option>
+                                <option value="T_FBSUPER">Taxa de frequência bruta ao superior</option>
+                                <option value="T_FLBAS">Taxa de frequência líquida ao básico</option>
+                                <option value="T_FLFUND">Taxa de frequência líquida ao fundamental</option>
+                                <option value="T_FLMED">Taxa de frequência líquida ao médio</option>
+                                <option value="T_FLPRE">Taxa de frequência líquida à pré-escola</option>
+                                <option value="T_FLSUPER">Taxa de frequência líquida ao superior</option>
+                                <option value="T_FREQ11A14">% de 11 a 14 anos na escola</option>
+                                <option value="T_FREQ15A17">% de 15 a 17 anos na escola</option>
+                                <option value="T_FREQ18A24">% de 18 a 24 anos na escola</option>
+                                <option value="T_FREQ25A29">% de 25 a 29 anos na escola</option>
+                                <option value="T_FREQ5a6 ">% de 5 a 6 anos na escola</option>
+                                <option value="T_FREQ6">% de 6 anos na escola</option>
+                                <option value="T_FREQ6A14">% de 6 a 14 anos na escola</option>
+                                <option value="T_FREQ6A17">% de 6 a 17 anos na escola</option>
+                                <option value="T_FREQFUND1517">% de 15 a 17 anos no fundamental</option>
+                                <option value="T_FREQFUND1824">% de 18 a 24 anos no fundamental</option>
+                                <option value="T_FREQMED1824">% de 18 a 24 anos no médio</option>
+                                <option value="T_FREQMED614">% de 6 a 14 anos no médio</option>
+                                <option value="T_FREQSUPER1517">% de 15 a 17 anos no superior</option>
+                                <option value="T_FUND11a13">% de 11 a 13 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND12A14">% de 12 a 14 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND15A17">% de 15 a 17 anos com fundamental completo</option>
+                                <option value="T_FUND16A18">% de 16 a 18 anos com fundamental completo</option>
+                                <option value="T_FUND18A24">% de 18 a 24 anos com fundamental completo</option>
+                                <option value="T_FUND18M">% de 18 anos ou mais com fundamental completo</option>
+                                <option value="T_FUND25M">% de 25 anos ou mais com fundamental completo</option>
+                                <option value="T_MED18a20">% de 18 a 20 anos com médio completo</option>
+                                <option value="T_MED18A24">% de 18 a 24 anos com médio completo</option>
+                                <option value="T_MED18M">% de 18 anos ou mais com médio completo</option>
+                                <option value="T_MED19A21">% de 19 a 21 anos com médio completo</option>
+                                <option value="T_MED25M">% de 25 anos ou mais com médio completo</option>
+                                <option value="T_SUPER25M">% de 25 anos ou mais com superior completo</option>
+                                <option value="CORTE1">Renda per capita máxima do 1º quinto mais pobre</option>
+                                <option value="CORTE2">Renda per capita máxima do 2° quinto mais pobre</option>
+                                <option value="CORTE3">Renda per capita máxima do 3° quinto mais pobre</option>
+                                <option value="CORTE4">Renda per capita máxima do 4°quinto mais pobre</option>
+                                <option value="CORTE9">Renda per capita mínima do décimo mais rico</option>
+                                <option value="GINI">Índice de Gini</option>
+                                <option value="PIND">% de extremamente pobres</option>
+                                <option value="PINDCRI">% de crianças extremamente pobres</option>
+                                <option value="PMPOB">% de pobres</option>
+                                <option value="PMPOBCRI">% de crianças pobres</option>
+                                <option value="PPOB">% de vulneráveis à pobreza</option>
+                                <option value="PPOBCRI">% de crianças vulneráveis à pobreza</option>
+                                <option value="PREN10RICOS">Percentual da renda apropriada pelos 10% mais ricos</option>
+                                <option value="PREN20">Percentual da renda apropriada pelos 20% mais pobres</option>
+                                <option value="PREN20RICOS">Percentual da renda apropriada pelos 20% mais ricos</option>
+                                <option value="PREN40">Percentual da renda apropriada pelos 40% mais pobres</option>
+                                <option value="PREN60">Percentual da renda apropriada pelos 60% mais pobres</option>
+                                <option value="PREN80">Percentual da renda apropriada pelos 80% mais pobres</option>
+                                <option value="PRENTRAB">% da renda proveniente de rendimentos do trabalho</option>
+                                <option value="R1040">Razão 10% mais ricos / 40% mais pobres</option>
+                                <option value="R2040">Razão 20% mais ricos / 40% mais pobres</option>
+                                <option value="RDPC">Renda per capita </option>
+                                <option value="RDPC1">Renda per capita média do 1º quinto mais pobre</option>
+                                <option value="RDPC10">Renda per capita média do décimo mais rico</option>
+                                <option value="RDPC2">Renda per capita média do 2º quinto mais pobre</option>
+                                <option value="RDPC3">Renda per capita média do 3º quinto mais pobre</option>
+                                <option value="RDPC4">Renda per capita média do 4º quinto mais pobre</option>
+                                <option value="RDPC5">Renda per capita média do quinto mais rico</option>
+                                <option value="RDPCT">Renda per capita , exceto renda nula</option>
+                                <option value="RIND">Renda per capita média dos extremamente pobres</option>
+                                <option value="RMPOB">Renda per capita média dos pobres</option>
+                                <option value="RPOB">Renda per capita média dos vulneráveis à pobreza</option>
+                                <option value="THEIL">Índice de Theil - L</option>
+                                <option value="T_AGUA">% da população em domicílios com água encanada</option>
+                                <option value="T_BANAGUA">% da população em domicílios com banheiro e água encanada</option>
+                                <option value="T_DENS">% da população em domicílios com densidade > 2</option>
+                                <option value="T_LIXO">% da população em domicílios com coleta de lixo</option>
+                                <option value="T_LUZ">% da população em domicílios com energia elétrica</option>
+                                <option value="AGUA_ESGOTO">% de pessoas em domicílios com abastecimento de água e esgotamento sanitário inadequados</option>
+                                <option value="T_CRIFUNDIN_TODOS">% de crianças em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FORA6A14">% de crianças de 6 a 14 fora da escola</option>
+                                <option value="T_FUNDIN_TODOS">% de pessoas em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FUNDIN_TODOS_MMEIO">% de pessoas em domicílios vulneráveis à pobreza e em que ninguém tem fundamental completo.</option>
+                                <option value="T_M10A14CF">% de mulheres de 10 a 14 anos que tiveram filhos</option>
+                                <option value="T_M15A17CF">% de mulheres de 15 a 17 anos que tiveram filhos</option>
+                                <option value="T_MULCHEFEFIF014">% de mães chefes de família sem fundamental completo e com filhos menores de 15 anos</option>
+                                <option value="T_RMAXIDOSO">% de pessoas em domicílios vulneráveis à pobreza e dependentes de idosos</option>
+                                <option value="T_SLUZ">% de pessoas em domicílios sem energia elétrica</option>
+                                <option value="HOMEM0A4">População masculina de 0 a 4 anos</option>
+                                <option value="HOMEM10A14">População masculina de 10 a 14 anos</option>
+                                <option value="HOMEM15A19">População masculina de 15 a 19 anos</option>
+                                <option value="HOMEM20A24">População masculina de 20 a 24 anos</option>
+                                <option value="HOMEM25A29">População masculina de 25 a 29 anos</option>
+                                <option value="HOMEM30A34">População masculina de 30 a 34 anos</option>
+                                <option value="HOMEM35A39">População masculina de 35 a 39 anos</option>
+                                <option value="HOMEM40A44">População masculina de 40 a 44 anos</option>
+                                <option value="HOMEM45A49">População masculina de 45 a 49 anos</option>
+                                <option value="HOMEM50A54">População masculina de 50 a 54 anos</option>
+                                <option value="HOMEM55A59">População masculina de 55 a 59 anos</option>
+                                <option value="HOMEM5A9">População masculina de 5 a 9 anos</option>
+                                <option value="HOMEM60A64">População masculina de 60 a 64 anos</option>
+                                <option value="HOMEM65A69">População masculina de 65 a 69 anos</option>
+                                <option value="HOMEM70A74">População masculina de 70 a 74 anos</option>
+                                <option value="HOMEM75A79">População masculina de 75 a 79 anos</option>
+                                <option value="HOMEMTOT">População residente masculina</option>
+                                <option value="HOMENS80">População masculina com 80 anos e mais</option>
+                                <option value="MULH0A4">População feminina de 0 a 4 anos</option>
+                                <option value="MULH10A14">População feminina de 10 a 14 anos</option>
+                                <option value="MULH15A19">População feminina de 15 a 19 anos</option>
+                                <option value="MULH20A24">População feminina de 20 a 24 anos</option>
+                                <option value="MULH25A29">População feminina de 25 a 29 anos</option>
+                                <option value="MULH30A34">População feminina de 30 a 34 anos</option>
+                                <option value="MULH35A39">População feminina de 35 a 39 anos</option>
+                                <option value="MULH40A44">População feminina de 40 a 44 anos</option>
+                                <option value="MULH45A49">População feminina de 45 a 49 anos</option>
+                                <option value="MULH50A54">População feminina de 50 a 54 anos</option>
+                                <option value="MULH55A59">População feminina de 55 a 59 anos</option>
+                                <option value="MULH5A9">População feminina de 5 a 9 anos</option>
+                                <option value="MULH60A64">População feminina de 60 a 64 anos</option>
+                                <option value="MULH65A69">População feminina de 65 a 69 anos</option>
+                                <option value="MULH70A74">População feminina de 70 a 74 anos</option>
+                                <option value="MULH75A79">População feminina de 75 a 79 anos</option>
+                                <option value="MULHER80">População feminina com 80 anos e mais</option>
+                                <option value="MULHERTOT">População residente feminina</option>
+                                <option value="PESO1114">População de 11 a 14 anos</option>
+                                <option value="PESO1113">População de 11 a 13 anos</option>
+                                <option value="PESO1214">População de 12 a 14 anos</option>
+                                <option value="PESO15">População de 15 anos ou mais</option>
+                                <option value="PESO1517">População de 15 a 17 anos</option>
+                                <option value="PESO1524">População de 15 a 24 anos</option>
+                                <option value="PESO1618">População de 16 a 18 anos</option>
+                                <option value="PESO18">População de 18 anos ou mais</option>
+                                <option value="Peso1820">População de 18 a 20 anos</option>
+                                <option value="Peso1824">População de 18 a 24 anos</option>
+                                <option value="Peso1921">População de 19 a 21 anos</option>
+                                <option value="PESO25">População de 25 anos ou mais</option>
+                                <option value="PESO5">População de 5 anos</option>
+                                <option value="PESO6">População de 6 anos</option>
+                                <option value="PESO610">População de 6 a 10 anos</option>
+                                <option value="Peso617">População de 6 a 17 anos</option>
+                                <option value="PESO65">População de 65 anos ou mais</option>
+                                <option value="PESOM1014">Mulheres de 10 a 14 anos</option>
+                                <option value="PESOM1517">Mulheres de 15 a 17 anos</option>
+                                <option value="PESOM15M">Mulheres de 15 anos ou mais</option>
+                                <option value="PESOM25M">Mulheres de 25 anos ou mais</option>
+                                <option value="PESORUR">População rural</option>
+                                <option value="PESOTOT">População total</option>
+                                <option value="PESOURB">População urbana</option>
+                                <option value="POP">População total em domicílios particulares permanentes</option>
+                                <option value="POPT">População total em domicílios particulares permanentes, exceto com renda nula</option>
+                                <option value="I_ESCOLARIDADE">Subíndice de escolaridade - IDH Educação</option>
+                                <option value="I_FREQ_PROP">Subíndice de frequência escolar - IDH Educação</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div class="viz-select" id="select-scatter-unit">
+                        <form>
+                            <p class="legenda">Área dos círculos</p>
+                            <select class="chosen-select" id="rScatterSel" style="width:185px;">
+                                <option value="IDHM">IDH</option>
+                                <option value="IDHM_E">IDH Educação</option>
+                                <option value="IDHM_L">IDH Longevidade</option>
+                                <option value="IDHM_R" selected>IDH Renda</option>
+                                <option value="ESPVIDA">Esperança de vida ao nascer </option>
+                                <option value="FECTOT">Taxa de fecundidade total</option>
+                                <option value="MORT1">Mortalidade infantil</option>
+                                <option value="MORT5">Mortalidade até 5 anos de idade</option>
+                                <option value="RAZDEP">Razão de dependência</option>
+                                <option value="SOBRE40">Probabilidade de sobrevivência até 40 anos</option>
+                                <option value="SOBRE60">Probabilidade de sobrevivência até 60 anos</option>
+                                <option value="T_ENV">Taxa de envelhecimento</option>
+                                <option value="E_ANOSESTUDO">Expectativa de anos de estudo</option>
+                                <option value="T_ANALF11A14">Taxa de analfabetismo - 11 a 14 anos</option>
+                                <option value="T_ANALF15A17">Taxa de analfabetismo - 15 a 17 anos </option>
+                                <option value="T_ANALF15M">Taxa de analfabetismo - 15 anos ou mais </option>
+                                <option value="T_ANALF18A24">Taxa de analfabetismo - 18 a 24 anos </option>
+                                <option value="T_ANALF18M">Taxa de analfabetismo - 18 anos ou mais </option>
+                                <option value="T_ANALF25A29">Taxa de analfabetismo - 25 a 29 anos </option>
+                                <option value="T_ANALF25M">Taxa de analfabetismo - 25 anos ou mais</option>
+                                <option value="T_ATRASO_0_BASICO">% de 6 a 17 anos no básico sem atraso</option>
+                                <option value="T_ATRASO_0_FUND">% de 6 a 14 anos no fundamental sem atraso</option>
+                                <option value="T_ATRASO_0_MED">% de 15 a 17 anos no médio sem atraso</option>
+                                <option value="T_ATRASO_1_BASICO">% de 6 a 17 no básico com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_FUND">% de 6 a 14 anos no fundamental com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_MED">% de 15 a 17 no médio com 1 ano de atraso</option>
+                                <option value="T_ATRASO_2_BASICO">% de 6 a 17 anos no básico com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_FUND">% de 6 a 14 anos no fundamental com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_MED">% de 15 a 17 anos no médio com 2 anos de atraso</option>
+                                <option value="T_FBBAS">Taxa de frequência bruta ao básico</option>
+                                <option value="T_FBFUND">Taxa de frequência bruta ao fundamental</option>
+                                <option value="T_FBMED">Taxa de frequência bruta ao médio</option>
+                                <option value="T_FBPRE">Taxa de frequência bruta à pré-escola</option>
+                                <option value="T_FBSUPER">Taxa de frequência bruta ao superior</option>
+                                <option value="T_FLBAS">Taxa de frequência líquida ao básico</option>
+                                <option value="T_FLFUND">Taxa de frequência líquida ao fundamental</option>
+                                <option value="T_FLMED">Taxa de frequência líquida ao médio</option>
+                                <option value="T_FLPRE">Taxa de frequência líquida à pré-escola</option>
+                                <option value="T_FLSUPER">Taxa de frequência líquida ao superior</option>
+                                <option value="T_FREQ11A14">% de 11 a 14 anos na escola</option>
+                                <option value="T_FREQ15A17">% de 15 a 17 anos na escola</option>
+                                <option value="T_FREQ18A24">% de 18 a 24 anos na escola</option>
+                                <option value="T_FREQ25A29">% de 25 a 29 anos na escola</option>
+                                <option value="T_FREQ5a6 ">% de 5 a 6 anos na escola</option>
+                                <option value="T_FREQ6">% de 6 anos na escola</option>
+                                <option value="T_FREQ6A14">% de 6 a 14 anos na escola</option>
+                                <option value="T_FREQ6A17">% de 6 a 17 anos na escola</option>
+                                <option value="T_FREQFUND1517">% de 15 a 17 anos no fundamental</option>
+                                <option value="T_FREQFUND1824">% de 18 a 24 anos no fundamental</option>
+                                <option value="T_FREQMED1824">% de 18 a 24 anos no médio</option>
+                                <option value="T_FREQMED614">% de 6 a 14 anos no médio</option>
+                                <option value="T_FREQSUPER1517">% de 15 a 17 anos no superior</option>
+                                <option value="T_FUND11a13">% de 11 a 13 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND12A14">% de 12 a 14 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND15A17">% de 15 a 17 anos com fundamental completo</option>
+                                <option value="T_FUND16A18">% de 16 a 18 anos com fundamental completo</option>
+                                <option value="T_FUND18A24">% de 18 a 24 anos com fundamental completo</option>
+                                <option value="T_FUND18M">% de 18 anos ou mais com fundamental completo</option>
+                                <option value="T_FUND25M">% de 25 anos ou mais com fundamental completo</option>
+                                <option value="T_MED18a20">% de 18 a 20 anos com médio completo</option>
+                                <option value="T_MED18A24">% de 18 a 24 anos com médio completo</option>
+                                <option value="T_MED18M">% de 18 anos ou mais com médio completo</option>
+                                <option value="T_MED19A21">% de 19 a 21 anos com médio completo</option>
+                                <option value="T_MED25M">% de 25 anos ou mais com médio completo</option>
+                                <option value="T_SUPER25M">% de 25 anos ou mais com superior completo</option>
+                                <option value="CORTE1">Renda per capita máxima do 1º quinto mais pobre</option>
+                                <option value="CORTE2">Renda per capita máxima do 2° quinto mais pobre</option>
+                                <option value="CORTE3">Renda per capita máxima do 3° quinto mais pobre</option>
+                                <option value="CORTE4">Renda per capita máxima do 4°quinto mais pobre</option>
+                                <option value="CORTE9">Renda per capita mínima do décimo mais rico</option>
+                                <option value="GINI">Índice de Gini</option>
+                                <option value="PIND">% de extremamente pobres</option>
+                                <option value="PINDCRI">% de crianças extremamente pobres</option>
+                                <option value="PMPOB">% de pobres</option>
+                                <option value="PMPOBCRI">% de crianças pobres</option>
+                                <option value="PPOB">% de vulneráveis à pobreza</option>
+                                <option value="PPOBCRI">% de crianças vulneráveis à pobreza</option>
+                                <option value="PREN10RICOS">Percentual da renda apropriada pelos 10% mais ricos</option>
+                                <option value="PREN20">Percentual da renda apropriada pelos 20% mais pobres</option>
+                                <option value="PREN20RICOS">Percentual da renda apropriada pelos 20% mais ricos</option>
+                                <option value="PREN40">Percentual da renda apropriada pelos 40% mais pobres</option>
+                                <option value="PREN60">Percentual da renda apropriada pelos 60% mais pobres</option>
+                                <option value="PREN80">Percentual da renda apropriada pelos 80% mais pobres</option>
+                                <option value="PRENTRAB">% da renda proveniente de rendimentos do trabalho</option>
+                                <option value="R1040">Razão 10% mais ricos / 40% mais pobres</option>
+                                <option value="R2040">Razão 20% mais ricos / 40% mais pobres</option>
+                                <option value="RDPC">Renda per capita </option>
+                                <option value="RDPC1">Renda per capita média do 1º quinto mais pobre</option>
+                                <option value="RDPC10">Renda per capita média do décimo mais rico</option>
+                                <option value="RDPC2">Renda per capita média do 2º quinto mais pobre</option>
+                                <option value="RDPC3">Renda per capita média do 3º quinto mais pobre</option>
+                                <option value="RDPC4">Renda per capita média do 4º quinto mais pobre</option>
+                                <option value="RDPC5">Renda per capita média do quinto mais rico</option>
+                                <option value="RDPCT">Renda per capita , exceto renda nula</option>
+                                <option value="RIND">Renda per capita média dos extremamente pobres</option>
+                                <option value="RMPOB">Renda per capita média dos pobres</option>
+                                <option value="RPOB">Renda per capita média dos vulneráveis à pobreza</option>
+                                <option value="THEIL">Índice de Theil - L</option>
+                                <option value="T_AGUA">% da população em domicílios com água encanada</option>
+                                <option value="T_BANAGUA">% da população em domicílios com banheiro e água encanada</option>
+                                <option value="T_DENS">% da população em domicílios com densidade > 2</option>
+                                <option value="T_LIXO">% da população em domicílios com coleta de lixo</option>
+                                <option value="T_LUZ">% da população em domicílios com energia elétrica</option>
+                                <option value="AGUA_ESGOTO">% de pessoas em domicílios com abastecimento de água e esgotamento sanitário inadequados</option>
+                                <option value="T_CRIFUNDIN_TODOS">% de crianças em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FORA6A14">% de crianças de 6 a 14 fora da escola</option>
+                                <option value="T_FUNDIN_TODOS">% de pessoas em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FUNDIN_TODOS_MMEIO">% de pessoas em domicílios vulneráveis à pobreza e em que ninguém tem fundamental completo.</option>
+                                <option value="T_M10A14CF">% de mulheres de 10 a 14 anos que tiveram filhos</option>
+                                <option value="T_M15A17CF">% de mulheres de 15 a 17 anos que tiveram filhos</option>
+                                <option value="T_MULCHEFEFIF014">% de mães chefes de família sem fundamental completo e com filhos menores de 15 anos</option>
+                                <option value="T_RMAXIDOSO">% de pessoas em domicílios vulneráveis à pobreza e dependentes de idosos</option>
+                                <option value="T_SLUZ">% de pessoas em domicílios sem energia elétrica</option>
+                                <option value="HOMEM0A4">População masculina de 0 a 4 anos</option>
+                                <option value="HOMEM10A14">População masculina de 10 a 14 anos</option>
+                                <option value="HOMEM15A19">População masculina de 15 a 19 anos</option>
+                                <option value="HOMEM20A24">População masculina de 20 a 24 anos</option>
+                                <option value="HOMEM25A29">População masculina de 25 a 29 anos</option>
+                                <option value="HOMEM30A34">População masculina de 30 a 34 anos</option>
+                                <option value="HOMEM35A39">População masculina de 35 a 39 anos</option>
+                                <option value="HOMEM40A44">População masculina de 40 a 44 anos</option>
+                                <option value="HOMEM45A49">População masculina de 45 a 49 anos</option>
+                                <option value="HOMEM50A54">População masculina de 50 a 54 anos</option>
+                                <option value="HOMEM55A59">População masculina de 55 a 59 anos</option>
+                                <option value="HOMEM5A9">População masculina de 5 a 9 anos</option>
+                                <option value="HOMEM60A64">População masculina de 60 a 64 anos</option>
+                                <option value="HOMEM65A69">População masculina de 65 a 69 anos</option>
+                                <option value="HOMEM70A74">População masculina de 70 a 74 anos</option>
+                                <option value="HOMEM75A79">População masculina de 75 a 79 anos</option>
+                                <option value="HOMEMTOT">População residente masculina</option>
+                                <option value="HOMENS80">População masculina com 80 anos e mais</option>
+                                <option value="MULH0A4">População feminina de 0 a 4 anos</option>
+                                <option value="MULH10A14">População feminina de 10 a 14 anos</option>
+                                <option value="MULH15A19">População feminina de 15 a 19 anos</option>
+                                <option value="MULH20A24">População feminina de 20 a 24 anos</option>
+                                <option value="MULH25A29">População feminina de 25 a 29 anos</option>
+                                <option value="MULH30A34">População feminina de 30 a 34 anos</option>
+                                <option value="MULH35A39">População feminina de 35 a 39 anos</option>
+                                <option value="MULH40A44">População feminina de 40 a 44 anos</option>
+                                <option value="MULH45A49">População feminina de 45 a 49 anos</option>
+                                <option value="MULH50A54">População feminina de 50 a 54 anos</option>
+                                <option value="MULH55A59">População feminina de 55 a 59 anos</option>
+                                <option value="MULH5A9">População feminina de 5 a 9 anos</option>
+                                <option value="MULH60A64">População feminina de 60 a 64 anos</option>
+                                <option value="MULH65A69">População feminina de 65 a 69 anos</option>
+                                <option value="MULH70A74">População feminina de 70 a 74 anos</option>
+                                <option value="MULH75A79">População feminina de 75 a 79 anos</option>
+                                <option value="MULHER80">População feminina com 80 anos e mais</option>
+                                <option value="MULHERTOT">População residente feminina</option>
+                                <option value="PESO1114">População de 11 a 14 anos</option>
+                                <option value="PESO1113">População de 11 a 13 anos</option>
+                                <option value="PESO1214">População de 12 a 14 anos</option>
+                                <option value="PESO15">População de 15 anos ou mais</option>
+                                <option value="PESO1517">População de 15 a 17 anos</option>
+                                <option value="PESO1524">População de 15 a 24 anos</option>
+                                <option value="PESO1618">População de 16 a 18 anos</option>
+                                <option value="PESO18">População de 18 anos ou mais</option>
+                                <option value="Peso1820">População de 18 a 20 anos</option>
+                                <option value="Peso1824">População de 18 a 24 anos</option>
+                                <option value="Peso1921">População de 19 a 21 anos</option>
+                                <option value="PESO25">População de 25 anos ou mais</option>
+                                <option value="PESO5">População de 5 anos</option>
+                                <option value="PESO6">População de 6 anos</option>
+                                <option value="PESO610">População de 6 a 10 anos</option>
+                                <option value="Peso617">População de 6 a 17 anos</option>
+                                <option value="PESO65">População de 65 anos ou mais</option>
+                                <option value="PESOM1014">Mulheres de 10 a 14 anos</option>
+                                <option value="PESOM1517">Mulheres de 15 a 17 anos</option>
+                                <option value="PESOM15M">Mulheres de 15 anos ou mais</option>
+                                <option value="PESOM25M">Mulheres de 25 anos ou mais</option>
+                                <option value="PESORUR">População rural</option>
+                                <option value="PESOTOT">População total</option>
+                                <option value="PESOURB">População urbana</option>
+                                <option value="POP">População total em domicílios particulares permanentes</option>
+                                <option value="POPT">População total em domicílios particulares permanentes, exceto com renda nula</option>
+                                <option value="I_ESCOLARIDADE">Subíndice de escolaridade - IDH Educação</option>
+                                <option value="I_FREQ_PROP">Subíndice de frequência escolar - IDH Educação</option>
+                            </select>
+                        </form>
+                    </div>
+                    <!--<div class="viz-select" id="select-scatter-unit">
+                        <form>
+                            <p class="legenda">Cores</p>
+                            <select class="chosen-select" id="corSel" style="width:137px;">
+                                <option value="IDHM" selected>IDH </option>
+                                <option value="IDHM_E">IDH Educação</option>
+                                <option value="IDHM_L">IDH Longevidade</option>
+                                <option value="IDHM_R">IDH Renda</option>
+                                <option value="ESPVIDA">Esperança de vida ao nascer </option>
+                                <option value="FECTOT">Taxa de fecundidade total</option>
+                                <option value="MORT1">Mortalidade infantil</option>
+                                <option value="MORT5">Mortalidade até 5 anos de idade</option>
+                                <option value="RAZDEP">Razão de dependência</option>
+                                <option value="SOBRE40">Probabilidade de sobrevivência até 40 anos</option>
+                                <option value="SOBRE60">Probabilidade de sobrevivência até 60 anos</option>
+                                <option value="T_ENV">Taxa de envelhecimento</option>
+                                <option value="E_ANOSESTUDO">Expectativa de anos de estudo</option>
+                                <option value="T_ANALF11A14">Taxa de analfabetismo - 11 a 14 anos</option>
+                                <option value="T_ANALF15A17">Taxa de analfabetismo - 15 a 17 anos </option>
+                                <option value="T_ANALF15M">Taxa de analfabetismo - 15 anos ou mais </option>
+                                <option value="T_ANALF18A24">Taxa de analfabetismo - 18 a 24 anos </option>
+                                <option value="T_ANALF18M">Taxa de analfabetismo - 18 anos ou mais </option>
+                                <option value="T_ANALF25A29">Taxa de analfabetismo - 25 a 29 anos </option>
+                                <option value="T_ANALF25M">Taxa de analfabetismo - 25 anos ou mais</option>
+                                <option value="T_ATRASO_0_BASICO">% de 6 a 17 anos no básico sem atraso</option>
+                                <option value="T_ATRASO_0_FUND">% de 6 a 14 anos no fundamental sem atraso</option>
+                                <option value="T_ATRASO_0_MED">% de 15 a 17 anos no médio sem atraso</option>
+                                <option value="T_ATRASO_1_BASICO">% de 6 a 17 no básico com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_FUND">% de 6 a 14 anos no fundamental com 1 ano de atraso</option>
+                                <option value="T_ATRASO_1_MED">% de 15 a 17 no médio com 1 ano de atraso</option>
+                                <option value="T_ATRASO_2_BASICO">% de 6 a 17 anos no básico com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_FUND">% de 6 a 14 anos no fundamental com 2 anos ou mais de atraso</option>
+                                <option value="T_ATRASO_2_MED">% de 15 a 17 anos no médio com 2 anos de atraso</option>
+                                <option value="T_FBBAS">Taxa de frequência bruta ao básico</option>
+                                <option value="T_FBFUND">Taxa de frequência bruta ao fundamental</option>
+                                <option value="T_FBMED">Taxa de frequência bruta ao médio</option>
+                                <option value="T_FBPRE">Taxa de frequência bruta à pré-escola</option>
+                                <option value="T_FBSUPER">Taxa de frequência bruta ao superior</option>
+                                <option value="T_FLBAS">Taxa de frequência líquida ao básico</option>
+                                <option value="T_FLFUND">Taxa de frequência líquida ao fundamental</option>
+                                <option value="T_FLMED">Taxa de frequência líquida ao médio</option>
+                                <option value="T_FLPRE">Taxa de frequência líquida à pré-escola</option>
+                                <option value="T_FLSUPER">Taxa de frequência líquida ao superior</option>
+                                <option value="T_FREQ11A14">% de 11 a 14 anos na escola</option>
+                                <option value="T_FREQ15A17">% de 15 a 17 anos na escola</option>
+                                <option value="T_FREQ18A24">% de 18 a 24 anos na escola</option>
+                                <option value="T_FREQ25A29">% de 25 a 29 anos na escola</option>
+                                <option value="T_FREQ5a6 ">% de 5 a 6 anos na escola</option>
+                                <option value="T_FREQ6">% de 6 anos na escola</option>
+                                <option value="T_FREQ6A14">% de 6 a 14 anos na escola</option>
+                                <option value="T_FREQ6A17">% de 6 a 17 anos na escola</option>
+                                <option value="T_FREQFUND1517">% de 15 a 17 anos no fundamental</option>
+                                <option value="T_FREQFUND1824">% de 18 a 24 anos no fundamental</option>
+                                <option value="T_FREQMED1824">% de 18 a 24 anos no médio</option>
+                                <option value="T_FREQMED614">% de 6 a 14 anos no médio</option>
+                                <option value="T_FREQSUPER1517">% de 15 a 17 anos no superior</option>
+                                <option value="T_FUND11a13">% de 11 a 13 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND12A14">% de 12 a 14 anos nos anos finais do fundamental ou com fundamental completo</option>
+                                <option value="T_FUND15A17">% de 15 a 17 anos com fundamental completo</option>
+                                <option value="T_FUND16A18">% de 16 a 18 anos com fundamental completo</option>
+                                <option value="T_FUND18A24">% de 18 a 24 anos com fundamental completo</option>
+                                <option value="T_FUND18M">% de 18 anos ou mais com fundamental completo</option>
+                                <option value="T_FUND25M">% de 25 anos ou mais com fundamental completo</option>
+                                <option value="T_MED18a20">% de 18 a 20 anos com médio completo</option>
+                                <option value="T_MED18A24">% de 18 a 24 anos com médio completo</option>
+                                <option value="T_MED18M">% de 18 anos ou mais com médio completo</option>
+                                <option value="T_MED19A21">% de 19 a 21 anos com médio completo</option>
+                                <option value="T_MED25M">% de 25 anos ou mais com médio completo</option>
+                                <option value="T_SUPER25M">% de 25 anos ou mais com superior completo</option>
+                                <option value="CORTE1">Renda per capita máxima do 1º quinto mais pobre</option>
+                                <option value="CORTE2">Renda per capita máxima do 2° quinto mais pobre</option>
+                                <option value="CORTE3">Renda per capita máxima do 3° quinto mais pobre</option>
+                                <option value="CORTE4">Renda per capita máxima do 4°quinto mais pobre</option>
+                                <option value="CORTE9">Renda per capita mínima do décimo mais rico</option>
+                                <option value="GINI">Índice de Gini</option>
+                                <option value="PIND">% de extremamente pobres</option>
+                                <option value="PINDCRI">% de crianças extremamente pobres</option>
+                                <option value="PMPOB">% de pobres</option>
+                                <option value="PMPOBCRI">% de crianças pobres</option>
+                                <option value="PPOB">% de vulneráveis à pobreza</option>
+                                <option value="PPOBCRI">% de crianças vulneráveis à pobreza</option>
+                                <option value="PREN10RICOS">Percentual da renda apropriada pelos 10% mais ricos</option>
+                                <option value="PREN20">Percentual da renda apropriada pelos 20% mais pobres</option>
+                                <option value="PREN20RICOS">Percentual da renda apropriada pelos 20% mais ricos</option>
+                                <option value="PREN40">Percentual da renda apropriada pelos 40% mais pobres</option>
+                                <option value="PREN60">Percentual da renda apropriada pelos 60% mais pobres</option>
+                                <option value="PREN80">Percentual da renda apropriada pelos 80% mais pobres</option>
+                                <option value="PRENTRAB">% da renda proveniente de rendimentos do trabalho</option>
+                                <option value="R1040">Razão 10% mais ricos / 40% mais pobres</option>
+                                <option value="R2040">Razão 20% mais ricos / 40% mais pobres</option>
+                                <option value="RDPC">Renda per capita </option>
+                                <option value="RDPC1">Renda per capita média do 1º quinto mais pobre</option>
+                                <option value="RDPC10">Renda per capita média do décimo mais rico</option>
+                                <option value="RDPC2">Renda per capita média do 2º quinto mais pobre</option>
+                                <option value="RDPC3">Renda per capita média do 3º quinto mais pobre</option>
+                                <option value="RDPC4">Renda per capita média do 4º quinto mais pobre</option>
+                                <option value="RDPC5">Renda per capita média do quinto mais rico</option>
+                                <option value="RDPCT">Renda per capita , exceto renda nula</option>
+                                <option value="RIND">Renda per capita média dos extremamente pobres</option>
+                                <option value="RMPOB">Renda per capita média dos pobres</option>
+                                <option value="RPOB">Renda per capita média dos vulneráveis à pobreza</option>
+                                <option value="THEIL">Índice de Theil - L</option>
+                                <option value="T_AGUA">% da população em domicílios com água encanada</option>
+                                <option value="T_BANAGUA">% da população em domicílios com banheiro e água encanada</option>
+                                <option value="T_DENS">% da população em domicílios com densidade > 2</option>
+                                <option value="T_LIXO">% da população em domicílios com coleta de lixo</option>
+                                <option value="T_LUZ">% da população em domicílios com energia elétrica</option>
+                                <option value="AGUA_ESGOTO">% de pessoas em domicílios com abastecimento de água e esgotamento sanitário inadequados</option>
+                                <option value="T_CRIFUNDIN_TODOS">% de crianças em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FORA6A14">% de crianças de 6 a 14 fora da escola</option>
+                                <option value="T_FUNDIN_TODOS">% de pessoas em domicílios em que ninguém tem fundamental completo</option>
+                                <option value="T_FUNDIN_TODOS_MMEIO">% de pessoas em domicílios vulneráveis à pobreza e em que ninguém tem fundamental completo.</option>
+                                <option value="T_M10A14CF">% de mulheres de 10 a 14 anos que tiveram filhos</option>
+                                <option value="T_M15A17CF">% de mulheres de 15 a 17 anos que tiveram filhos</option>
+                                <option value="T_MULCHEFEFIF014">% de mães chefes de família sem fundamental completo e com filhos menores de 15 anos</option>
+                                <option value="T_RMAXIDOSO">% de pessoas em domicílios vulneráveis à pobreza e dependentes de idosos</option>
+                                <option value="T_SLUZ">% de pessoas em domicílios sem energia elétrica</option>
+                                <option value="HOMEM0A4">População masculina de 0 a 4 anos</option>
+                                <option value="HOMEM10A14">População masculina de 10 a 14 anos</option>
+                                <option value="HOMEM15A19">População masculina de 15 a 19 anos</option>
+                                <option value="HOMEM20A24">População masculina de 20 a 24 anos</option>
+                                <option value="HOMEM25A29">População masculina de 25 a 29 anos</option>
+                                <option value="HOMEM30A34">População masculina de 30 a 34 anos</option>
+                                <option value="HOMEM35A39">População masculina de 35 a 39 anos</option>
+                                <option value="HOMEM40A44">População masculina de 40 a 44 anos</option>
+                                <option value="HOMEM45A49">População masculina de 45 a 49 anos</option>
+                                <option value="HOMEM50A54">População masculina de 50 a 54 anos</option>
+                                <option value="HOMEM55A59">População masculina de 55 a 59 anos</option>
+                                <option value="HOMEM5A9">População masculina de 5 a 9 anos</option>
+                                <option value="HOMEM60A64">População masculina de 60 a 64 anos</option>
+                                <option value="HOMEM65A69">População masculina de 65 a 69 anos</option>
+                                <option value="HOMEM70A74">População masculina de 70 a 74 anos</option>
+                                <option value="HOMEM75A79">População masculina de 75 a 79 anos</option>
+                                <option value="HOMEMTOT">População residente masculina</option>
+                                <option value="HOMENS80">População masculina com 80 anos e mais</option>
+                                <option value="MULH0A4">População feminina de 0 a 4 anos</option>
+                                <option value="MULH10A14">População feminina de 10 a 14 anos</option>
+                                <option value="MULH15A19">População feminina de 15 a 19 anos</option>
+                                <option value="MULH20A24">População feminina de 20 a 24 anos</option>
+                                <option value="MULH25A29">População feminina de 25 a 29 anos</option>
+                                <option value="MULH30A34">População feminina de 30 a 34 anos</option>
+                                <option value="MULH35A39">População feminina de 35 a 39 anos</option>
+                                <option value="MULH40A44">População feminina de 40 a 44 anos</option>
+                                <option value="MULH45A49">População feminina de 45 a 49 anos</option>
+                                <option value="MULH50A54">População feminina de 50 a 54 anos</option>
+                                <option value="MULH55A59">População feminina de 55 a 59 anos</option>
+                                <option value="MULH5A9">População feminina de 5 a 9 anos</option>
+                                <option value="MULH60A64">População feminina de 60 a 64 anos</option>
+                                <option value="MULH65A69">População feminina de 65 a 69 anos</option>
+                                <option value="MULH70A74">População feminina de 70 a 74 anos</option>
+                                <option value="MULH75A79">População feminina de 75 a 79 anos</option>
+                                <option value="MULHER80">População feminina com 80 anos e mais</option>
+                                <option value="MULHERTOT">População residente feminina</option>
+                                <option value="PESO1114">População de 11 a 14 anos</option>
+                                <option value="PESO1113">População de 11 a 13 anos</option>
+                                <option value="PESO1214">População de 12 a 14 anos</option>
+                                <option value="PESO15">População de 15 anos ou mais</option>
+                                <option value="PESO1517">População de 15 a 17 anos</option>
+                                <option value="PESO1524">População de 15 a 24 anos</option>
+                                <option value="PESO1618">População de 16 a 18 anos</option>
+                                <option value="PESO18">População de 18 anos ou mais</option>
+                                <option value="Peso1820">População de 18 a 20 anos</option>
+                                <option value="Peso1824">População de 18 a 24 anos</option>
+                                <option value="Peso1921">População de 19 a 21 anos</option>
+                                <option value="PESO25">População de 25 anos ou mais</option>
+                                <option value="PESO5">População de 5 anos</option>
+                                <option value="PESO6">População de 6 anos</option>
+                                <option value="PESO610">População de 6 a 10 anos</option>
+                                <option value="Peso617">População de 6 a 17 anos</option>
+                                <option value="PESO65">População de 65 anos ou mais</option>
+                                <option value="PESOM1014">Mulheres de 10 a 14 anos</option>
+                                <option value="PESOM1517">Mulheres de 15 a 17 anos</option>
+                                <option value="PESOM15M">Mulheres de 15 anos ou mais</option>
+                                <option value="PESOM25M">Mulheres de 25 anos ou mais</option>
+                                <option value="PESORUR">População rural</option>
+                                <option value="PESOTOT">População total</option>
+                                <option value="PESOURB">População urbana</option>
+                                <option value="POP">População total em domicílios particulares permanentes</option>
+                                <option value="POPT">População total em domicílios particulares permanentes, exceto com renda nula</option>
+                                <option value="I_ESCOLARIDADE">Subíndice de escolaridade - IDH Educação</option>
+                                <option value="I_FREQ_PROP">Subíndice de frequência escolar - IDH Educação</option>
+                            </select>
+                        </form>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+	
+	var config = {
+		'.chosen-select'           : {},
+		'.chosen-select-deselect'  : {allow_single_deselect:true},
+		'.chosen-select-no-single' : {disable_search_threshold:10},
+		'.chosen-select-no-results': {no_results_text:'Não encontrado!'},
+		'.chosen-select-width'     : {width:"100%"}
+	}
+	for (var selector in config) {
+		$(selector).chosen(config[selector]);
+	}
+	
+//////////////declarar variáveis globais
+	var anoSelecionado = 1991;
+	var novoAno;
+	var dataset = [];
+	var xScatterMin,
+		xScatterMax,
+		yScatterMin,
+		yScatterMax,
+		rScatterMin,
+		rScatterMax,
+		xAxisMin,
+		xAxisMax,
+		yAxisMin,
+		yAxisMax,
+		xBarrasMin,
+		xBarrasMax,
+		corMin,
+		corMax;
+	var colorScale;
+	var pallete = ["#559AC4", "#447EA1", "#366480", "#254457", "#1B3240", "#1B3240"];
+	var corRealce = "#FFC800";
+			
+	var xScatterSel = $("#xScatterSel").val(),
+		yScatterSel = $("#yScatterSel").val(),
+		rScatterSel = $("#rScatterSel").val(),
+		xBarrasSel = $("#xBarrasSel").val(),
+		corSel = $("#xBarrasSel").val();
+			
+//////////////////////////SETUP SVGS
+
+/////////////////MAPA
+		
+	//definir largura e altura
+	var wMapa = parseFloat(d3.select("#viz-mapa").style("width").slice(0,-2));
+	var hMapa = parseFloat(d3.select("#viz-mapa").style("height").slice(0,-2));
+	
+	//criar elemento svg
+	var svgMapa = d3.select("#viz-mapa")
+		.append("svg")
+		.attr("width", wMapa)
+		.attr("height", hMapa);
+	var pathMapa;
+	
+/////////////////SCATTER
+		
+	//definir largura e altura
+	var wScatter = parseFloat(d3.select("#viz-scatter").style("width").slice(0,-2));
+	var hScatter = parseFloat(d3.select("#viz-scatter").style("height").slice(0,-2));
+	var xAxis;
+	var xTicks;
+	var xAxisScale;
+	var yAxis;
+	var yTicks;
+	var yAxisScale;
+	
+	var svgScatter = d3.select("#viz-scatter")
+		.append("svg")
+		.attr("width", wScatter)
+		.attr("height", hScatter);
+	var circleScatter,
+		textScatter;
+			
+/////////////////BARRAS
+		
+	//definir largura e altura
+	var wBarras = parseFloat(d3.select("#viz-barras").style("width").slice(0,-2));
+	var hBarras = parseFloat(d3.select("#viz-barras").style("height").slice(0,-2));
+	var paddingBarras = {top: 5, right: 20, bottom: 10, left: 20};
+		
+	//define myNewSvg
+	var svgBarras = d3.select("#viz-barras")
+		.append("svg")
+		.attr("width", wBarras)
+		.attr("height", hBarras);
+	var rectBarras,
+		textBarras;
+	
+/////////////////SLIDER ANO
+		
+	//definir largura e altura
+	var wControles = parseFloat(d3.select("#viz-ano").style("width").slice(0,-2));
+	var hControles = parseFloat(d3.select("#viz-ano").style("height").slice(0,-2));
+		
+	//definir svg
+	var svgControles = d3.select("#viz-ano")
+		.append("svg")
+		.attr("width", wControles)
+		.attr("height", hControles);
+	
+//////////////////////////1o PLOT
+//////////////updateLimits()
+	function updateLimits(rawDataset) {
+			xScatterMin91 = d3.min(rawDataset, function(d) { return parseFloat(d[xScatterSel+"_91"]); });
+			xScatterMax91 = d3.max(rawDataset, function(d) { return parseFloat(d[xScatterSel+"_91"]); });
+			yScatterMin91 = d3.min(rawDataset, function(d) { return parseFloat(d[yScatterSel+"_91"]); });
+			yScatterMax91 = d3.max(rawDataset, function(d) { return parseFloat(d[yScatterSel+"_91"]); });
+			rScatterMin91 = d3.min(rawDataset, function(d) { return parseFloat(d[rScatterSel+"_91"]); });
+			rScatterMax91 = d3.max(rawDataset, function(d) { return parseFloat(d[rScatterSel+"_91"]); });
+			xBarrasMin91 = d3.min(rawDataset, function(d) { return parseFloat(d[xBarrasSel+"_91"]); });
+			xBarrasMax91 = d3.max(rawDataset, function(d) { return parseFloat(d[xBarrasSel+"_91"]); });
+			corMin91 = d3.min(rawDataset, function(d) { return parseFloat(d[corSel+"_91"]); });
+			corMax91 = d3.max(rawDataset, function(d) { return parseFloat(d[corSel+"_91"]); });
+			
+			xScatterMin00 = d3.min(rawDataset, function(d) { return parseFloat(d[xScatterSel+"_00"]); });
+			xScatterMax00 = d3.max(rawDataset, function(d) { return parseFloat(d[xScatterSel+"_00"]); });
+			yScatterMin00 = d3.min(rawDataset, function(d) { return parseFloat(d[yScatterSel+"_00"]); });
+			yScatterMax00 = d3.max(rawDataset, function(d) { return parseFloat(d[yScatterSel+"_00"]); });
+			rScatterMin00 = d3.min(rawDataset, function(d) { return parseFloat(d[rScatterSel+"_00"]); });
+			rScatterMax00 = d3.max(rawDataset, function(d) { return parseFloat(d[rScatterSel+"_00"]); });
+			xBarrasMin00 = d3.min(rawDataset, function(d) { return parseFloat(d[xBarrasSel+"_00"]); });
+			xBarrasMax00 = d3.max(rawDataset, function(d) { return parseFloat(d[xBarrasSel+"_00"]); });
+			corMin00 = d3.min(rawDataset, function(d) { return parseFloat(d[corSel+"_00"]); });
+			corMax00 = d3.max(rawDataset, function(d) { return parseFloat(d[corSel+"_00"]); });
+			
+			xScatterMin10 = d3.min(rawDataset, function(d) { return parseFloat(d[xScatterSel+"_10"]); });
+			xScatterMax10 = d3.max(rawDataset, function(d) { return parseFloat(d[xScatterSel+"_10"]); });
+			yScatterMin10 = d3.min(rawDataset, function(d) { return parseFloat(d[yScatterSel+"_10"]); });
+			yScatterMax10 = d3.max(rawDataset, function(d) { return parseFloat(d[yScatterSel+"_10"]); });
+			rScatterMin10 = d3.min(rawDataset, function(d) { return parseFloat(d[rScatterSel+"_10"]); });
+			rScatterMax10 = d3.max(rawDataset, function(d) { return parseFloat(d[rScatterSel+"_10"]); });
+			xBarrasMin10 = d3.min(rawDataset, function(d) { return parseFloat(d[xBarrasSel+"_10"]); });
+			xBarrasMax10 = d3.max(rawDataset, function(d) { return parseFloat(d[xBarrasSel+"_10"]); });
+			corMin10 = d3.min(rawDataset, function(d) { return parseFloat(d[corSel+"_10"]); });
+			corMax10 = d3.max(rawDataset, function(d) { return parseFloat(d[corSel+"_10"]); });
+			
+			xScatterMin = d3.min([xScatterMin91, xScatterMin00, xScatterMin10]);
+			xScatterMax = d3.max([xScatterMax91, xScatterMax00, xScatterMax10]);
+			yScatterMin = d3.min([yScatterMin91, yScatterMin00, yScatterMin10]);
+			yScatterMax = d3.max([yScatterMax91, yScatterMax00, yScatterMax10]);
+			rScatterMin = d3.min([rScatterMin91, rScatterMin00, rScatterMin10]);
+			rScatterMax = d3.max([rScatterMax91, rScatterMax00, rScatterMax10]);
+			xBarrasMin = d3.min([xBarrasMin91, xBarrasMin00, xBarrasMin10]);
+			xBarrasMax = d3.max([xBarrasMax91, xBarrasMax00, xBarrasMax10]);
+			corMin = d3.min([corMin91, corMin00, corMin10]);
+			corMax = d3.max([corMax91, corMax00, corMax10]);
+	}
+
+//////////////firstPlot()
+	function firstPlot() {
+		d3.csv("IDH_BRA_estados.csv", function(error, rawDataset) {
+			
+			//popular 1o dataset com dados de 1991
+			for(i = 0; i < rawDataset.length; i++) {
+				dataset.push({	
+				
+					xScatter: rawDataset[i][xScatterSel+"_91"],
+					yScatter: rawDataset[i][yScatterSel+"_91"],
+					rScatter: rawDataset[i][rScatterSel+"_91"],
+					xBarras: rawDataset[i][xBarrasSel+"_91"],
+					cor: rawDataset[i][corSel+"_91"],
+					UFSIGLA: rawDataset[i].UFSIGLA,
+					selecao: false
+				});
+				
+			}
+			
+			updateLimits(rawDataset);
+			
+			var corD = (corMax - corMin)/4;
+			colorScale = d3.scale.threshold()
+				.domain([corMin+corD, corMin+2*corD, corMin+3*corD, corMax, corMax+corD])
+				.range(pallete);
+				
+			plotBarras();
+			plotScatter();
+			plotMapa();
+			sliderAno();
+			
+		});	
+	}
+	
+/////////////////FUNÇÕES DE PLOT
+
+//////////////sliderAno()
+	function sliderAno() {
+		//
+		var padding = {top: 10, right: 10, bottom: 15, left: 10};
+		
+		var yearScale = d3.scale.quantize()
+			.domain([0, wControles])
+			.range([1991, 2000, 2010]);
+		
+		var box91 = svgControles.append("rect")
+			.attr("y", 0)
+			.attr("x", 0)
+			.attr("width", wControles/3)
+			.attr("height", hControles)
+			.attr("fill", "rgba(0,0,0,.15)"),
+			box00 = svgControles.append("rect")
+			.attr("y", 0)
+			.attr("x", wControles/3)
+			.attr("width", wControles/3)
+			.attr("height", hControles)
+			.attr("fill", "rgba(0,0,0,.05)"),
+			box10 = svgControles.append("rect")
+			.attr("y", 0)
+			.attr("x", 2*wControles/3)
+			.attr("width", wControles/3)
+			.attr("height", hControles)
+			.attr("fill", "rgba(0,0,0,.05)");
+			
+		var label91 = svgControles.append("text")
+			.attr("class", "viz-ano-label")
+			.attr("y", hControles - padding.bottom)
+			.attr("x", wControles/6)
+			.text("91")
+			.attr("fill", "#569AC4"),
+			label00 = svgControles.append("text")
+			.attr("class", "viz-ano-label")
+			.attr("y", hControles - padding.bottom)
+			.attr("x", wControles/2)
+			.text("00")
+			.attr("fill", "rgba(255,255,255,.7)"),
+			label10 = svgControles.append("text")
+			.attr("class", "viz-ano-label")
+			.attr("y", hControles - padding.bottom)
+			.attr("x", 5*wControles/6)
+			.text("10")
+			.attr("fill", "rgba(255,255,255,.7)");
+		
+		var overlay = svgControles.append("rect")
+			.attr("class", "overlay")
+			.attr("x", 0)
+			.attr("y", 0)
+			.attr("width", wControles)
+			.attr("height", hControles)
+			.on("mousemove", function() {
+			
+				var novoAno = yearScale(d3.mouse(this)[0]);
+					
+				if(novoAno != anoSelecionado) {
+					anoSelecionado = novoAno;
+					atualizarPlots();
+					
+					switch(anoSelecionado) {
+						case 1991:
+							box91.attr("fill", "rgba(0,0,0,.15)");
+							label91.attr("fill", "#569AC4");
+							box00.attr("fill", "rgba(0,0,0,.05)");
+							label00.attr("fill", "rgba(255,255,255,.7)");
+							box10.attr("fill", "rgba(0,0,0,.05)");
+							label10.attr("fill", "rgba(255,255,255,.7)");
+							break;
+						case 2000:
+							box91.attr("fill", "rgba(0,0,0,.05)");
+							label91.attr("fill", "rgba(255,255,255,.7)");
+							box00.attr("fill", "rgba(0,0,0,.15)");
+							label00.attr("fill", "#569AC4");
+							box10.attr("fill", "rgba(0,0,0,.05)");
+							label10.attr("fill", "rgba(255,255,255,.7)");
+							break;
+						case 2010:
+							box91.attr("fill", "rgba(0,0,0,.05)");
+							label91.attr("fill", "rgba(255,255,255,.7)");
+							box00.attr("fill", "rgba(0,0,0,.05)");
+							label00.attr("fill", "rgba(255,255,255,.7)");
+							box10.attr("fill", "rgba(0,0,0,.15)");
+							label10.attr("fill", "#569AC4");
+							break;
+						default:
+					}
+					
+				}
+			
+				
+			});
+	}
+
+//////////////plotScatter()
+	function plotScatter() {
+		
+		var alphaGravity = 0.005;
+		var alphaCollide = 0.01;
+		
+		var padding = {top: 80, right: 50, bottom: 50, left: 50};
+		xAxisMin = d3.min(dataset, function(d) { return parseFloat(d.xScatter); });
+		xAxisMax = d3.max(dataset, function(d) { return parseFloat(d.xScatter); });
+		yAxisMin = d3.min(dataset, function(d) { return parseFloat(d.yScatter); });
+		yAxisMax = d3.max(dataset, function(d) { return parseFloat(d.yScatter); });
+		
+		//Create scale functions
+		var xScale = d3.scale.linear()
+			.domain([xScatterMin-.1*(xScatterMax-xScatterMin), xScatterMax])
+			.range([padding.left, wScatter - padding.right]);
+		var yScale = d3.scale.linear()
+			.domain([yScatterMin-.1*(yScatterMax-yScatterMin), yScatterMax])
+			.range([hScatter - padding.bottom, padding.top]);
+		var rScale = d3.scale.pow().exponent(2)
+			.domain([rScatterMin, rScatterMax])
+			.range([((rScatterMin*rScatterMin)/(rScatterMax*rScatterMax))*25, 25]);
+		xAxisScale = d3.scale.linear()
+			.domain([xAxisMin, xAxisMax])
+			.range([xScale(xAxisMin), xScale(xAxisMax)]);
+		yAxisScale = d3.scale.linear()
+			.domain([yAxisMin, yAxisMax])
+			.range([yScale(yAxisMin), yScale(yAxisMax)]);
+			
+		//definir scales para collide()
+		var radius = rScale,
+			x = xScale;
+		
+		for(var i = 0; i < dataset.length; i++) {
+			dataset[i].cx = xScale(dataset[i].xScatter);
+			dataset[i].cy = yScale(dataset[i].yScatter);
+			dataset[i].radius = rScale(dataset[i].rScatter);
+		}
+
+		var force = d3.layout.force()
+			.nodes(dataset)
+			.size([wScatter, hScatter])
+			.gravity(0)
+			.charge(0)
+			.on("tick", tick)
+			.start();
+		
+		//Create SVG element
+		circleScatter = svgScatter.selectAll("circle")
+			.data(dataset)
+			.enter()
+			.append("circle")
+			.attr("r", function(d) { return d.radius; })
+			//.attr("stroke", "#aaa")
+			.attr("fill", function(d) { return colorScale(d.cor); })
+			.attr("cx", function(d) { return xScale(d.xScatter); })
+			.attr("cy", function(d) { return yScale(d.yScatter); })
+			.attr("r", function(d) { return rScale(d.rScatter); })
+			.style("cursor", "pointer")
+			.call(force.drag)
+			.on("click", function(d) { 
+				d.selecao = !d.selecao;				
+				for(var i = 0; i < dataset.length; i++) {
+					if(d.UFSIGLA == pathMapa[0][i].__data__.properties.UFSIGLA) {
+						pathMapa[0][i].__data__.properties.selecao = !pathMapa[0][i].__data__.properties.selecao;
+					}
+				}
+				realce();
+			});
+		
+		textScatter = svgScatter.selectAll("text")
+			.data(dataset)
+			.enter()
+			.append("text")
+			.text(function(d) { return d.UFSIGLA; })
+			.attr("x", function(d) { return xScale(d.xScatter); })
+			.attr("y", function(d) { return yScale(d.yScatter); })
+			.attr("font-family", "Museo300Regular")
+			.attr("font-size", "10px")
+			.attr("fill", "white")
+			.attr("text-anchor", "middle")
+			.style("pointer-events", "none")
+			.call(force.drag);
+			
+		function tick(e) {
+			svgScatter.selectAll("circle")
+				.each(gravity(alphaGravity))
+				.each(collide(alphaCollide))
+				.attr("cx", function(d) { return d.x; })
+				.attr("cy", function(d) { return d.y; });
+			textScatter
+				.each(gravity(alphaGravity))
+				.each(collide(alphaCollide))
+				.attr("x", function(d) { return d.x; })
+				.attr("y", function(d) { return d.y + 3; });
+		}
+		
+		//função para evitar colisões entre círculos
+		function collide(alpha) {
+			var quadtree = d3.geom.quadtree(dataset);
+			return function(d) {
+				var r = d.radius + radius.domain()[1] + padding,
+					nx1 = d.x - r,
+					nx2 = d.x + r,
+					ny1 = d.y - r,
+					ny2 = d.y + r;
+				quadtree.visit(function(quad, x1, y1, x2, y2) {
+					if (quad.point && (quad.point !== d)) {
+						var x = d.x - quad.point.x,
+							y = d.y - quad.point.y,
+							l = Math.sqrt(x * x + y * y),
+							r = d.radius + quad.point.radius;
+						if (l < r) {
+							l = (l - r) / l * alpha;
+							d.x -= x *= l;
+							d.y -= y *= l;
+							quad.point.x += x;
+							quad.point.y += y;
+						}
+					}
+					return x1 > nx2
+						|| x2 < nx1
+						|| y1 > ny2
+						|| y2 < ny1;
+				});
+			};
+		}
+			
+		// criar função para atrair círculos as suas posições
+		function gravity(alpha) {
+			return function(d) {
+				d.y += (d.cy - d.y) * alpha;
+				d.x += (d.cx - d.x) * alpha;
+			};
+		}
+		
+		xTicks = [xAxisMin, xAxisMax];
+		yTicks = [yAxisMin, yAxisMax];
+					
+		//criar eixos
+		//Define X axis
+		xAxis = d3.svg.axis()
+			.scale(xAxisScale)
+			.orient("bottom")
+			.tickValues(xTicks);
+
+		//Define Y axis
+		yAxis = d3.svg.axis()
+			.scale(yAxisScale)
+			.orient("left")
+			.tickValues(yTicks);
+		
+		//Create X axis
+		svgScatter.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + (hScatter - padding.bottom) + ")")
+			.call(xAxis);
+		
+		//Create Y axis
+		svgScatter.append("g")
+			.attr("class", "y axis")
+			.attr("transform", "translate(" + padding.left + ",0)")
+			.call(yAxis);		
+
+	}
+
+//////////////plotBarras()
+	function plotBarras() {
+		
+		//define ordinal scales to position bars
+		var yScale = d3.scale.ordinal()
+			.domain(d3.range(dataset.length))
+			.rangeRoundBands([paddingBarras.top, hBarras - paddingBarras.bottom], 0.05);
+		var xScale = d3.scale.linear()
+			.domain([0, xBarrasMax])
+			.range([paddingBarras.left, wBarras - paddingBarras.left - paddingBarras.right]);
+		
+		//define rectangles within mySvg and bind to dataset
+		rectBarras = svgBarras.selectAll("rect")
+			.data(dataset)
+			.enter()
+			.append("rect")
+			.sort(function(a, b) { 
+				return d3.descending(parseFloat(a.xBarras), parseFloat(b.xBarras));
+			})
+			.style("fill", function(d) { return colorScale(d.cor); })
+			.attr("y", function(d, i) { return yScale(i); })
+			.attr("x", function(d) { return paddingBarras.left; })
+			.attr("height", yScale.rangeBand())
+			.attr("width", function(d) { return xScale(d.xBarras); })
+			.on("click", function(d) { 
+				d.selecao = !d.selecao;
+				for(var i = 0; i < dataset.length; i++) {
+					if(d.UFSIGLA == pathMapa[0][i].__data__.properties.UFSIGLA) {
+						pathMapa[0][i].__data__.properties.selecao = !pathMapa[0][i].__data__.properties.selecao;
+					}
+				}
+				realce();
+			})
+			.style("cursor", "pointer")
+			.transition()
+			.duration(200);
+			
+			
+		
+		//define labels within mySvg and bind to dataset
+		textBarras = svgBarras.selectAll("text")
+			.data(dataset)
+			.enter()
+			.append("text")
+			.sort(function(a, b) { 
+				return d3.descending(parseFloat(a.xBarras), parseFloat(b.xBarras));
+			})
+			.text(function(d) { return d.UFSIGLA + " = " + d.xBarras; })
+			.attr("y", function(d, i) { return yScale(i) + 13; })
+			.attr("x", function(d) { return paddingBarras.left + 6; })
+			.attr("font-family", "Museo300Regular")
+			.attr("font-size", "11px")
+			.attr("fill", "white")
+			.attr("text-anchor", "left")
+			.style("pointer-events", "none");
+	}
+
+//////////////plotMapa()
+	function plotMapa() {
+		
+		var centroBR = [-54.3, -15.2];
+		
+		//definir projeção do mapa
+		var projection = d3.geo.mercator()
+			.center(centroBR)
+			.translate([wMapa/2, hMapa/2])
+			.scale([1.3 * wMapa]);
+		
+		//definir gerador de path
+		var path = d3.geo.path()
+			.projection(projection);
+			
+		//carregar dados do GeoJSON
+		d3.json("BRA_estados.json", function(json) {
+			
+			for(var i = 0; i < dataset.length; i++) {
+				for(var j = 0; j < json.features.length; j++) {
+					if(dataset[i].UFSIGLA == json.features[j].properties.name) {
+						json.features[j].properties.cor = dataset[i].cor;
+						json.features[j].properties.UFSIGLA = dataset[i].UFSIGLA;
+						json.features[j].properties.selecao = dataset[i].selecao;
+					}
+				}
+			}
+			
+			//criar path e colorir conforme color(value)
+			pathMapa = svgMapa.selectAll("path")
+				.data(json.features)
+				.enter()
+				.append("path")
+				.attr("d", path)
+				.attr("id", "path-mapa")
+				.style("fill", function(d) { return colorScale(d.properties.cor); })
+				.style("stroke", "white")
+				.on("mousemove", function(d) {
+					projection = d3.geo.mercator()
+						.center(centroBR)
+						.translate([2.1*(.5*wMapa-d3.mouse(this)[0])+.5*wMapa, 2.1*(.5*hMapa-d3.mouse(this)[1])+.5*hMapa])
+						.scale([4 * wMapa]);
+					path = d3.geo.path()
+						.projection(projection);
+					pathMapa.attr("d", path);
+					d3.select(".viz-mapa-label#label" + d.properties.UFSIGLA)
+						.style("display", "block");
+				})
+				.on("mouseout", function(d) {
+					projection = d3.geo.mercator()
+						.center(centroBR)
+						.translate([wMapa*.5, hMapa*.5])
+						.scale([1.3 * wMapa]);
+					path = d3.geo.path()
+						.projection(projection);
+					pathMapa.attr("d", path);
+					d3.select(".viz-mapa-label#label" + d.properties.UFSIGLA)
+						.style("display", "none");
+				})
+				.on("click", function(d) { 
+					d.properties.selecao = !d.properties.selecao;
+					for(var i = 0; i < dataset.length; i++) {
+						if(dataset[i].UFSIGLA == d.properties.UFSIGLA) {
+							dataset[i].selecao = !dataset[i].selecao;
+						}
+					}
+					realce();
+				});
+			realce();
+		});
+	}	
+
+//////////////atualizarPlots()
+	function atualizarPlots() {
+		
+		//carregar dados sobre IDH no estados brasileiros
+		d3.csv("IDH_BRA_estados.csv", function(error, rawDataset) {
+			
+			switch(anoSelecionado) {
+				case 1991:
+					for(i = 0; i < rawDataset.length; i++) {
+						dataset[i].xScatter = rawDataset[i][xScatterSel+"_91"];
+						dataset[i].yScatter = rawDataset[i][yScatterSel+"_91"];
+						dataset[i].rScatter = rawDataset[i][rScatterSel+"_91"];
+						dataset[i].xBarras = rawDataset[i][xBarrasSel+"_91"];
+						dataset[i].cor = rawDataset[i][corSel+"_91"];
+					}
+					break;
+				case 2000:
+					for(i = 0; i < rawDataset.length; i++) {
+						dataset[i].xScatter = rawDataset[i][xScatterSel+"_00"];
+						dataset[i].yScatter = rawDataset[i][yScatterSel+"_00"];
+						dataset[i].rScatter = rawDataset[i][rScatterSel+"_00"];
+						dataset[i].xBarras = rawDataset[i][xBarrasSel+"_00"];
+						dataset[i].cor = rawDataset[i][corSel+"_00"];
+					}
+					break;
+				case 2010:
+					for(i = 0; i < rawDataset.length; i++) {
+						dataset[i].xScatter = rawDataset[i][xScatterSel+"_10"];
+						dataset[i].yScatter = rawDataset[i][yScatterSel+"_10"];
+						dataset[i].rScatter = rawDataset[i][rScatterSel+"_10"];
+						dataset[i].xBarras = rawDataset[i][xBarrasSel+"_10"];
+						dataset[i].cor = rawDataset[i][corSel+"_10"];
+					}
+					break;
+			}
+			
+			updateLimits(rawDataset);
+			
+			var corD = (corMax - corMin)/4;
+			colorScale = d3.scale.threshold()
+				.domain([corMin+corD, corMin+2*corD, corMin+3*corD, corMax, corMax+corD])
+				.range(pallete);
+			
+			svgMapa.selectAll("path").remove();
+			svgMapa.selectAll("text").remove();
+			plotMapa();
+			
+			svgBarras.selectAll("rect").remove();
+			svgBarras.selectAll("text").remove();
+			svgBarras.transition().duration(500);
+			plotBarras();
+			
+			svgScatter.selectAll("circle").remove();
+			svgScatter.selectAll("text").remove();
+			svgScatter.selectAll("g").remove();
+			plotScatter();
+			
+			realce();
+			
+			
+			
+			
+		});	
+		
+	}
+
+//////////////realce()
+	function realce() {
+		
+		xTicks = [xAxisMin, xAxisMax];
+		yTicks = [yAxisMin, yAxisMax];
+		
+		//realçar o estado selecionado
+		for(var i = 0; i < dataset.length; i++) {
+			var selecaoScatter = circleScatter[0][i].__data__.selecao;
+			var selecaoBarras = rectBarras[0][i].__data__.selecao;
+			var selecaoMapa = pathMapa[0][i].__data__.properties.selecao;
+		
+			if(selecaoScatter) {
+				circleScatter[0][i].style.fill = corRealce;
+				textScatter[0][i].style.fill = "#569AC4";
+				xTicks.splice(-1,0,dataset[i].xScatter);
+				yTicks.splice(-1,0,dataset[i].yScatter);
+			} else {
+				circleScatter[0][i].style.fill = colorScale(circleScatter[0][i].__data__.cor);
+				textScatter[0][i].style.fill = "white";
+			}
+			if(selecaoBarras) {
+				rectBarras[0][i].style.fill = corRealce;
+				textBarras[0][i].style.fill = "#569AC4";
+			} else {
+				rectBarras[0][i].style.fill = colorScale(rectBarras[0][i].__data__.cor);
+				textBarras[0][i].style.fill = "white";
+			}
+			if(selecaoMapa) {
+				pathMapa[0][i].style.fill = corRealce;
+			} else {
+				pathMapa[0][i].style.fill = colorScale(pathMapa[0][i].__data__.properties.cor);
+			}
+		}
+		
+		xTicks = xTicks.filter(function(elem, pos) { return xTicks.indexOf(elem) == pos; });
+		yTicks = yTicks.filter(function(elem, pos) { return yTicks.indexOf(elem) == pos; });
+		
+		svgScatter.selectAll("g").remove();
+		xAxis = d3.svg.axis()
+			.scale(xAxisScale)
+			.orient("bottom")
+			.tickValues(xTicks);
+		//Define Y axis
+		yAxis = d3.svg.axis()
+			.scale(yAxisScale)
+			.orient("left")
+			.tickValues(yTicks);
+		//Create X axis
+		svgScatter.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + (hScatter - 50) + ")")
+			.call(xAxis);
+		//Create Y axis
+		svgScatter.append("g")
+			.attr("class", "y axis")
+			.attr("transform", "translate(" + 50 + ",0)")
+			.call(yAxis);
+	}
+
+//////////////inicializar!
+	firstPlot();
+	$('select').change(function() { 
+		xScatterSel = $("#xScatterSel").val();
+		yScatterSel = $("#yScatterSel").val();
+		rScatterSel = $("#rScatterSel").val();
+		xBarrasSel = $("#xBarrasSel").val();
+		corSel = $("#xBarrasSel").val();
+		
+		atualizarPlots(); 
+		
+		$('#xScatterSel').val(xScatterSel).trigger('chosen:updated');
+		$('#yScatterSel').val(yScatterSel).trigger('chosen:updated');
+		$('#rScatterSel').val(rScatterSel).trigger('chosen:updated');
+		$('#xBarrasSel').val(xBarrasSel).trigger('chosen:updated');
+		//$('#corSel').val(corSel).trigger('chosen:updated');
+	});
+	
+	
+	</script>
+    
+</body>
+</html>
